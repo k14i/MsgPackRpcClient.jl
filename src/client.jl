@@ -6,4 +6,12 @@ function connect()
   connect(PORT)
 end
 
+function send()
+  return sendv()
+end
+
+function sendv()
+
+end
+
 end #client
