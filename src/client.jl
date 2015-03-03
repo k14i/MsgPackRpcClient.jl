@@ -21,8 +21,8 @@ type Client
     this
   end
 
-  # function init(self::Client)
-  # end
+  function init(self::Client)
+  end
 
   function open(args)
     client = Client(args)
@@ -30,21 +30,39 @@ type Client
   end
 
   type Context(object)
+    client::Client
+
+    function init(self::Context, client::Client)
+      self._client = client
+    end
+
+    function enter(self::Context)
+      return self._client
+    end
+
+    function exit(self::Context, _type::String, value::String, traceback::String)
+      self.client.close()
+      if _type
+        return false
+      end
+      return true
+    end
+
   end
 end
 
-const PORT = 5000
+# const PORT = 5000
 
-function connect()
-  connect(PORT)
-end
+# function connect()
+#   connect(PORT)
+# end
 
-function send()
-  return sendv()
-end
+# function send()
+#   return sendv()
+# end
 
-function sendv()
+# function sendv()
 
-end
+# end
 
 end #client
