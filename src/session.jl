@@ -22,12 +22,19 @@ type Session
   end
 
   function call(self::Session, method::Method, args::Array)
+    # return self.send_request(method, args).get()
   end
 
   function call_async(self::Session, method::Method, args::Array)
+    # return self.send_request(method, args)
   end
 
   function send_request(self::Session, method::Method, args::Array)
+    # msgid = next(self.generator)
+    # future = Future(self.loop, self.timeout)
+    # self.request_table[msgid] = future
+    # self.transport.send_message([message.REQUEST, msgid, method, args])
+    # return future
   end
 
   function notify(self::Session, method::Method, args::Array)
