@@ -38,6 +38,11 @@ type Session
   end
 
   function notify(self::Session, method::Method, args::Array)
+    # function callback
+    #   self.loop.stop()
+    # end
+    # self.transport.send_message([message.NOTIFY, method, args], callback = callback)
+    # self.loop.start()
   end
 
   function close(self::Session)
