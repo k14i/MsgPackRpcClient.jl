@@ -46,6 +46,11 @@ type Session
   end
 
   function close(self::Session)
+    # if self.transport
+    #   self.transport.close()
+    # end
+    # self.transport = nothing
+    # self.request_table = {}
   end
 
   function on_connect_failed(self::Session, reason::Reason)
