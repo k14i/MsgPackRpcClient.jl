@@ -1,23 +1,51 @@
 module session
 
+type Loop end
+type Tcp end
+type Method end
+type Reason end
+type Error end
+type Result end
+
 type Session
   address::String
   timeout::Int
-  loop::Loop
-  builder::Tcp
+#  loop::Loop
+#  builder::Tcp
   reconnect_limit::Int
   pack_encoding::String
   unpack_encoding::String
 
-  function Session(session::Session)
-    this                 = new()
-    this.address         = session.address
-    this.timeout         = session.timeout
-    this.loop            = session.loop
-    this.builder         = session.builder
-    this.reconnect_limit = session.reconnect_limit
-    this.pack_encoding   = session.pack_encoding
-    this.unpack_encoding = session.unpack_encoding
+  call::Function
+  call_async::Function
+  send_request::Function
+  notify::Function
+  close::Function
+  on_connect_failed::Function
+  on_response::Function
+  on_timeout::Function
+  step_timeout::Function
+
+  function Session(address, timeout, loop, builder, reconnect_limit, pack_encoding, unpack_encoding)
+    this                   = new()
+    this.address           = address
+    this.timeout           = timeout
+#    this.loop              = loop
+#    this.builder           = builder
+    this.reconnect_limit   = reconnect_limit
+    this.pack_encoding     = pack_encoding
+    this.unpack_encoding   = unpack_encoding
+
+    this.call              = function() call(this, method, args) end
+    this.call_async        = function() call_async(this, method, args) end
+    this.send_request      = function() send_request(this, method, args) end
+    this.notify            = function() notify(this, method, args) end
+    this.close             = function() close(this) end
+    this.on_connect_failed = function() on_connect_failed(self, reason) end
+    this.on_response       = function() on_response(self, msgid, error, result) end
+    this.on_timeout        = function() on_timeout(self, msgid) end
+    this.step_timeout      = function() step_timeout(self) end
+
     this
   end
 
@@ -65,9 +93,9 @@ type Session
   function step_timeout(self::Session)
   end
 
-end
+  function NoSyncIDGenerator()
+  end
 
-function NoSyncIDGenerator
 end
 
 end # session
