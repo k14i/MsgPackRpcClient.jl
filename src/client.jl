@@ -8,6 +8,8 @@ type Client
   reconnect_limit::Int
   pack_encoding::String
   unpack_encoding::String
+  init::Function
+  open::Function
 
   function Client(address, timeout, loop, builder, reconnect_limit, pack_encoding, unpack_encoding)
     this = new()
@@ -18,6 +20,10 @@ type Client
     this.reconnect_limit = reconnect_limit
     this.pack_encoding = pack_encoding
     this.unpack_encoding = unpack_encoding
+
+    this.init = function() init(this) end
+    this.open = function() open(args) end
+
     this
   end
 
@@ -31,6 +37,18 @@ type Client
 
   type Context(object)
     client::Client
+    init::Function
+    enter::Function
+    exit::Function
+
+    function Context()
+      this = new()
+      this.init = function() init(this, client) end
+      this.enter = function() enter(this) end
+      this.exit = function() exit(this, _type, value, traceback) end
+
+      this
+    end
 
     function init(self::Context, client::Client)
       self._client = client
