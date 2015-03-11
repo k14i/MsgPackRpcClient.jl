@@ -99,9 +99,14 @@ type Session
 
   function NoSyncIDGenerator()
     counter = 0
-    #while true
-    #  counter += 1
-    #end
+    while true
+      counter += 1
+      if counter > (1 << 30)
+        counter = 0
+        break
+      end
+    end
+    return counter
   end
 
 end
