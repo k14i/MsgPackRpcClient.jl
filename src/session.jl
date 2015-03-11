@@ -25,6 +25,9 @@ type Session
   on_response::Function
   on_timeout::Function
   step_timeout::Function
+  NoSyncIDGenerator::Function
+
+  request_table::Array
 
   function Session(address, timeout, loop, builder, reconnect_limit, pack_encoding, unpack_encoding)
     this                   = new()
@@ -45,6 +48,7 @@ type Session
     this.on_response       = function() on_response(self, msgid, error, result) end
     this.on_timeout        = function() on_timeout(self, msgid) end
     this.step_timeout      = function() step_timeout(self) end
+    this.generator         = function() NoSyncIDGenerator() end
 
     this
   end
@@ -94,6 +98,10 @@ type Session
   end
 
   function NoSyncIDGenerator()
+    counter = 0
+    #while true
+    #  counter += 1
+    #end
   end
 
 end
