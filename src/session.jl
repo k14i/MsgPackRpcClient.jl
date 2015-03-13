@@ -50,6 +50,8 @@ type Session
     this.step_timeout      = function() step_timeout(self) end
     this.generator         = function() NoSyncIDGenerator() end
 
+    this.request_table     = []
+
     this
   end
 
@@ -92,6 +94,8 @@ type Session
   end
 
   function on_timeout(self::Session, msgid::Int)
+    # future = self.request_table.pop(msgid)
+    # future.set_error("Request timed out")
   end
 
   function step_timeout(self::Session)
