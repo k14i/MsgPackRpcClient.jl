@@ -91,6 +91,17 @@ type Session
   end
 
   function on_response(self::Session, msgid::Int, error::Error, result::Result)
+    # if not msgid in self._request_table
+    #     return
+    # end
+    # future = self.request_table.pop(msgid)
+
+    # if error is not nothing
+    #   future.set_error(error)
+    # else
+    #   future.set_result(result)
+    # end
+    # self.loop.stop()
   end
 
   function on_timeout(self::Session, msgid::Int)
