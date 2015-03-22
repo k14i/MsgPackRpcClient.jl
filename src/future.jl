@@ -15,8 +15,8 @@ type Future
   set_flag::Bool
   timeout::Int
   callback::Callback
-  error_handler::Hnadler
-  result_handler::Hnadler
+  error_handler::Handler
+  result_handler::Handler
 
   join::Function
   get::Function
