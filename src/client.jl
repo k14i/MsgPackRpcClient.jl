@@ -1,5 +1,7 @@
 module client
 
+export Client
+
 type Client
   address::String
   timeout::Int
@@ -83,4 +85,4 @@ end
 
 # end
 
-end #client
+end # module client

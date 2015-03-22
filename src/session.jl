@@ -1,5 +1,7 @@
 module session
 
+export Session
+
 type Loop end
 type Tcp end
 type Method end
@@ -126,4 +128,4 @@ type Session
 
 end
 
-end # session
+end # module session

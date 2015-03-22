@@ -1,5 +1,7 @@
 module future
 
+export Future
+
 type Loop end
 type Error end
 type Result end
