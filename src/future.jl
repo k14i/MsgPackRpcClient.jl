@@ -76,9 +76,9 @@ type Future
       if (self.error != nothing)
         if (self.error_handler != nothing)
           self.error_handler(self)
-        else
-          
         end
+      else
+        return self.result
       end
     end
   end
