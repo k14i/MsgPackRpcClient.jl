@@ -84,6 +84,12 @@ type Future
   end
 
   function set(self::Future, error::Error, result::Result)
+    self.error  = error
+    self.result = result
+
+    if (self.callback)
+      self.callback(self)
+    end
   end
 
   function set_result(self::Future, result::Result)
