@@ -53,9 +53,34 @@ type Future
   end
 
   function join(self::Future)
+    while (!self.set_flag)
+      self.loop.start()
+    end
   end
 
   function get(self::Future)
+    self.join(self)
+
+    assert(self.set_flag)
+    if (!self.set_flag)
+      error("RPCError(128)")
+    end
+
+    if (self.result != nothing)
+      if (self.result_handler == nothing)
+        return self.result
+      else
+        self.result_handler(self.result)
+      end
+    else
+      if (self.error != nothing)
+        if (self.error_handler != nothing)
+          self.error_handler(self)
+        else
+          
+        end
+      end
+    end
   end
 
   function set(self::Future, error::Error, result::Result)
