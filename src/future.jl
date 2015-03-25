@@ -93,6 +93,8 @@ type Future
   end
 
   function set_result(self::Future, result::Result)
+    self.set(self, nothing, result)
+    self.set_flag = true
   end
 
   function set_error(self::Future, error::Error)
