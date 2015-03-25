@@ -98,6 +98,8 @@ type Future
   end
 
   function set_error(self::Future, error::Error)
+    self.set(self, error, nothing)
+    self.set_flag = true
   end
 
   function attach_callback(self::Future, callback::Callback)
