@@ -103,15 +103,24 @@ type Future
   end
 
   function attach_callback(self::Future, callback::Callback)
+    self.callback = callback
   end
 
   function attach_error_handler(self::Future, handler::Hnadler)
+    self.error_handler = handler
   end
 
   function attach_result_handler(self::Future, handler::Handler)
+    self.result_handler = handler
   end
 
   function step_timeout(self::Future)
+    if self.timeout < 1
+      return true
+    else
+      self.timeout -= 1
+      return false
+    end
   end
 
 end
