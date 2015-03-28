@@ -39,9 +39,18 @@ type Loop
   end
 
   function attach_periodic_callback(self::Loop, callback::Callback, callback_time::Int)
+    if (self.periodic_callback != nothing)
+      self.dettach_periodic_callback(self)
+    end
+    # self.periodic_callback = ioloop.PeriodicCallback(callback, callback_time, self._ioloop)
+    # self.periodic_callback.start
   end
 
   function dettach_periodic_callback(self::Loop)
+    # if (self.periodic_callback != nothing)
+    #   self.periodic_callback.stop()
+    # end
+    self.periodic_callback = nothing
   end
 
 end
