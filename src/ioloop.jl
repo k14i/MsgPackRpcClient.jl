@@ -115,5 +115,10 @@ end
 type PollIOLoop
 end
 
+type _Timeout
+end
+
+type PeriodicCallback
+end
 
 end # module IOLoop
