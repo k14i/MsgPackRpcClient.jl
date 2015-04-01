@@ -5,6 +5,18 @@ export IOLoop
 type IOLoop
 
   function IOLoop()
+    this = new()
+    this.instance = function() instance() end
+    this.initialized = function() initialized() end
+    this.install = function() install(this) end
+    this.clear_instance = function() clear_instance() end
+    this.current = function() current(true) end
+    this.make_current = function() make_current(this) end
+    this.clear_current = function() clear_current() end
+    # this.configurable_base = function() configurable_base(cls) end
+    # this.configurable_default = function() configurable_default(cls) end
+    this.initialize = function() initialize(this, nothing) end
+    this
   end
 
   function instance()
@@ -28,11 +40,11 @@ type IOLoop
   function clear_current()
   end
 
-  function configurable_base(cls)
-  end
+  # function configurable_base(cls)
+  # end
 
-  function configurable_default(cls)
-  end
+  # function configurable_default(cls)
+  # end
 
   function initialize(self::IOLoop, make_current=nothing)
   end
