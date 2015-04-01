@@ -16,6 +16,10 @@ type IOLoop
     # this.configurable_base = function() configurable_base(cls) end
     # this.configurable_default = function() configurable_default(cls) end
     this.initialize = function() initialize(this, nothing) end
+    this.close = function() close(this, false) end
+    # this.add_handler = function() add_handler(this, fd, handler, events) end
+    # this.update_handler = function() update_handler(this, fd, events) end
+    # this.remove_handler = function() remove_handler(this, fd) end
     this
   end
 
@@ -40,11 +44,11 @@ type IOLoop
   function clear_current()
   end
 
-  # function configurable_base(cls)
-  # end
+  function configurable_base(cls)
+  end
 
-  # function configurable_default(cls)
-  # end
+  function configurable_default(cls)
+  end
 
   function initialize(self::IOLoop, make_current=nothing)
   end
