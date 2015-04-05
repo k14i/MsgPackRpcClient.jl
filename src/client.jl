@@ -10,7 +10,7 @@ const NO_METHOD_ERROR = 0x01
 const ARGUMENT_ERROR  = 0x02
 
 type Session
-  conn          :: Base.TcpSocket
+  sock          :: Base.TcpSocket
 #  auto_coercing :: Bool
   next_id       :: Int32
 end
@@ -32,33 +32,33 @@ end
 
 # Example:
 #   s = Session(socket, false, 0)
-#   send_v(s, "get", "foo", 0, [])
-function send_v(self::Session, func_name::String, args...)
-  msg_id = self.next_id
-  if self.next_id == 1<<31
-    self.next_id = 0
+#   call(s, "get", "foo", 0, [])
+function call(s::Session, method::String, params...)
+  msg_id = s.next_id
+  if s.next_id == 1<<31
+    s.next_id = 0
   else
-    self.next_id += 1
+    s.next_id += 1
   end
-  send_request(self.conn, msg_id, func_name, args)
-  res = receive_response(self.conn, msg_id)
+  send_request(s.sock, msg_id, method, params)
+  receive_response(s.sock, msg_id)
 end
 
-function send_request(sock, msg_id::Int32, func_name::String, args)
-  arr = {}  # NOTE: Equal to: arr = Any[], which can grow.
-  for arg in args
-    push!(arr, arg)
+function send_request(sock::Base.TcpSocket, msg_id::Int32, method::String, args)
+  params = {}  # NOTE: Equal to: arr = Any[], which can grow.
+  for x in args
+    push!(params, x)
   end
-  packed_data = MsgPack.pack([REQUEST, msg_id, func_name, arr])
+  packed_data = MsgPack.pack([REQUEST, msg_id, method, params])
   send_data(sock, packed_data)
 end
 
-function send_data(sock, data)
+function send_data(sock::Base.TcpSocket, data)
   # TODO: Use sockpool
   write(sock, data)
 end
 
-function receive_response(sock, msg_id::Int32)
+function receive_response(sock::Base.TcpSocket, msg_id::Int32)
   future = Future(false, nothing, nothing)
   packed_data = receive_data(sock, future)
   if future.is_set == false
@@ -76,11 +76,12 @@ function receive_response(sock, msg_id::Int32)
   unpacked_data[4]
 end
 
-function receive_data(sock, future::Future)
-  data = join(sock, future)
+function receive_data(sock::Base.TcpSocket, future::Future)
+#  data = join(sock, future)
+  data = readavailable(sock)
 end
 
-function join(sock, future::Future)
+function join(sock::Base.TcpSocket, future::Future)
   while future.is_set == false
     data = readavailable(sock)
     if length(data) > 0
