@@ -40,23 +40,27 @@ function send_v(self::Session, func_name::String, args...)
   else
     self.next_id += 1
   end
-  send_request(msg_id, func_name, args)
-  res = receive_response(msg_id)
+  send_request(self.conn, msg_id, func_name, args)
+  res = receive_response(self.conn, msg_id)
 end
 
-function send_request(msg_id::Int32, func_name::String, args...)
-  packed_data = MsgPack.pack([REQUEST, msg_id, func_name, args])
-  send_data(packed_data)
+function send_request(sock, msg_id::Int32, func_name::String, args)
+  arr = {}
+  for arg in args
+    push!(arr, arg)
+  end
+  packed_data = MsgPack.pack([REQUEST, msg_id, func_name, arr])
+  send_data(sock, packed_data)
 end
 
-function send_data(data)
+function send_data(sock, data)
   # TODO: Use sockpool
   write(sock, data)
 end
 
-function receive_response(msg_id::Int32)
+function receive_response(sock, msg_id::Int32)
   future = Future(false, nothing, nothing)
-  packed_data = receive_data(future)
+  packed_data = receive_data(sock, future)
   if future.is_set == false
   end
   unpacked_data = MsgPack.unpack(packed_data)
@@ -71,11 +75,11 @@ function receive_response(msg_id::Int32)
   unpacked_data[4]
 end
 
-function receive_data(future::Future)
-  data = join(future)
+function receive_data(sock, future::Future)
+  data = join(sock, future)
 end
 
-function join(future::Future)
+function join(sock, future::Future)
   while future.is_set == false
     data = read(sock, Array)
     if length(data) > 0
