@@ -11,7 +11,7 @@ const ARGUMENT_ERROR  = 0x02
 
 type Session
   conn          :: Base.TcpSocket
-  auto_coercing :: Bool
+#  auto_coercing :: Bool
   next_id       :: Int32
 end
 
@@ -27,8 +27,8 @@ type Future
   result :: Any
 end
 
-function coerce_uint()
-end
+# function coerce_uint()
+# end
 
 # Example:
 #   s = Session(socket, false, 0)
