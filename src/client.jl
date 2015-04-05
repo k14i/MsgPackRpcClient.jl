@@ -1,4 +1,4 @@
-module MsgPackClient
+module MsgPackRpcClient
 
 using MsgPack
 # using Reactive
