@@ -45,7 +45,7 @@ function send_v(self::Session, func_name::String, args...)
 end
 
 function send_request(sock, msg_id::Int32, func_name::String, args)
-  arr = {}
+  arr = {}  # NOTE: Equal to: arr = Any[], which can grow.
   for arg in args
     push!(arr, arg)
   end
@@ -64,11 +64,12 @@ function receive_response(sock, msg_id::Int32)
   if future.is_set == false
   end
   unpacked_data = MsgPack.unpack(packed_data)
+  # TODO: Error handlings
   if unpacked_data[1] != RESPONSE  # type
   end
   if unpacked_data[2] != msg_id # msgid
   end
-  if length(unpacked_data[3]) != 0  # error
+  if unpacked_data[3] != nothing  # error
   end
   if length(unpacked_data[4]) == 0  # result
   end
@@ -81,7 +82,7 @@ end
 
 function join(sock, future::Future)
   while future.is_set == false
-    data = read(sock, Array)
+    data = readavailable(sock)
     if length(data) > 0
       future.is_set == true
       return data
