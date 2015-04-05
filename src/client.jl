@@ -1,6 +1,7 @@
 module MsgPackClient
 
 using MsgPack
+# using Reactive
 
 const REQUEST  = 0  # [0, msgid, method, param]
 const RESPONSE = 1  # [1, msgid, error, result]
@@ -40,7 +41,7 @@ function send_v(self::Session, func_name::String, args...)
     self.next_id += 1
   end
   send_request(msg_id, func_name, args)
-  receive_response()
+  res = receive_response(msg_id)
 end
 
 function send_request(msg_id::Int32, func_name::String, args...)
@@ -53,17 +54,36 @@ function send_data(data)
   write(sock, data)
 end
 
-function receive_response()
-  packed_data = receive_data()
-  MsgPack.unpack(packed_data)
+function receive_response(msg_id::Int32)
+  future = Future(false, nothing, nothing)
+  packed_data = receive_data(future)
+  if future.is_set == false
+  end
+  unpacked_data = MsgPack.unpack(packed_data)
+  if unpacked_data[1] != RESPONSE  # type
+  end
+  if unpacked_data[2] != msg_id # msgid
+  end
+  if length(unpacked_data[3]) != 0  # error
+  end
+  if length(unpacked_data[4]) == 0  # result
+  end
+  unpacked_data[4]
 end
 
-function receive_data()
-  read(sock)
+function receive_data(future::Future)
+  data = join(future)
 end
 
 function join(future::Future)
   while future.is_set == false
+    data = read(sock, Array)
+    if length(data) > 0
+      future.is_set == true
+      return data
+    end
+    sleep(0.1)
+    # TODO: Implement timeout
   end
 end
 
