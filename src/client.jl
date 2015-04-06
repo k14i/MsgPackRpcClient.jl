@@ -45,7 +45,7 @@ function call(s::Session, method::String, params...)
 end
 
 function send_request(sock::Base.TcpSocket, msg_id::Int32, method::String, args)
-  params = {}  # NOTE: Equal to: arr = Any[], which can grow.
+  params = {}  # NOTE: Equal to ```params = Any[]```, which can grow.
   for x in args
     push!(params, x)
   end
