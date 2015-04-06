@@ -3,6 +3,8 @@ module MsgPackRpcClient
 using MsgPack
 # using Reactive
 
+export Session, SessionPool, call
+
 const REQUEST  = 0  # [0, msgid, method, param]
 const RESPONSE = 1  # [1, msgid, error, result]
 const NOTIFY   = 2  # [2, method, param]
@@ -13,6 +15,10 @@ type Session
   sock          :: Base.TcpSocket
 #  auto_coercing :: Bool
   next_id       :: Int32
+end
+
+type SockPool
+  pool :: Array
 end
 
 type Result
