@@ -3,7 +3,7 @@ module MsgPackRpcClient
 using MsgPack
 # using Reactive
 
-export Session, SessionPool, call
+export Session, SockPool, call
 
 const REQUEST  = 0  # [0, msgid, method, param]
 const RESPONSE = 1  # [1, msgid, error, result]
