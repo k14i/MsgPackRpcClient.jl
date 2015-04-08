@@ -19,6 +19,39 @@ end
 
 type SockPool
   pool :: Array
+
+  function SockPool(pool)
+    this          = new()
+    this.pool     = pool
+    this.init     = function() init(this) end
+    this.is_empty = function() is_empty(this) end
+    this.reject!  = function() reject!(this) end
+    this.push     = function() push(this) end
+    this.delete   = function() delete(this) end
+    this
+  end
+
+  function init(self::SockPool)
+    self.pool = Base.TcpSocket[]
+  end
+
+  function is_empty(self::SockPool)
+    if length(self.pool) != 0
+      return false
+    else
+      return true
+    end
+  end
+
+  function reject!(self::SockPool)
+  end
+
+  function push(self::SockPool, sock::Base.TcpSocket)
+    push!(self.pool, sock)
+  end
+
+  function delete(self::SockPool, sock::Base.TcpSocket)
+  end
 end
 
 type Result
