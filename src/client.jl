@@ -18,21 +18,29 @@ type Session
 end
 
 type SockPool
-  pool :: Array
+  pool     :: Array
+  init     :: Function
+  is_empty :: Function
+  reject!  :: Function
+  push     :: Function
+  delete   :: Function
+  destroy  :: Function
 
-  function SockPool(pool)
+  function SockPool()
     this          = new()
-    this.pool     = pool
+    this.pool     = Union(Base.TcpSocket, Nothing)[]
     this.init     = function() init(this) end
     this.is_empty = function() is_empty(this) end
     this.reject!  = function() reject!(this) end
     this.push     = function() push(this) end
     this.delete   = function() delete(this) end
+    this.destroy  = function() destroy(this) end
     this
   end
 
   function init(self::SockPool)
-    self.pool = Base.TcpSocket[]
+    self.pool = Union(Base.TcpSocket, Nothing)[]
+    self
   end
 
   function is_empty(self::SockPool)
@@ -48,9 +56,29 @@ type SockPool
 
   function push(self::SockPool, sock::Base.TcpSocket)
     push!(self.pool, sock)
+    self
   end
 
   function delete(self::SockPool, sock::Base.TcpSocket)
+    i = 1
+    for x in self
+      if x == sock
+        close(self[i])
+        self[i] = nothing
+      end
+      i += 1
+    end
+    self
+  end
+
+  function destroy(self::SockPool)
+    for x in self
+      if x == nothing
+        continue
+      end
+      close(x)
+    end
+    nothing
   end
 end
 
