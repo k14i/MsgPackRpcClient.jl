@@ -7,8 +7,7 @@ type SockPool
 end
 
 function new()
-  self = SockPool(Union(Base.TcpSocket, Nothing)[])
-  self
+  SockPool(Union(Base.TcpSocket, Nothing)[])
 end
 
 function show(self::SockPool)
