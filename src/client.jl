@@ -13,8 +13,14 @@ const NOTIFY   = 2  # [2, method, param]
 const NO_METHOD_ERROR = 0x01
 const ARGUMENT_ERROR  = 0x02
 
+# type Transport
+#   address
+#   sock_pool :: MsgPackRpcClientSockPool
+# end
+
 type Session
   sock          :: Base.TcpSocket
+  # transport :: Transport
 #  auto_coercing :: Bool
   next_id       :: Int32
 end
