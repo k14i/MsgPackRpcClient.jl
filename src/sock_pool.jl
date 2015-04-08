@@ -33,7 +33,9 @@ function push(self::SockPool, sock::Base.TcpSocket)
 end
 
 function add_port(self::SockPool, port::Int)
-  sock = connect(port)
+  if activate == true
+    sock = connect(port)
+  end
   push!(self.pool, sock)
   self
 end
@@ -50,8 +52,10 @@ function delete(self::SockPool, sock::Base.TcpSocket)
   i = 1
   for x in self.pool
     if x == sock
-      close(self[i])
-      self[i] = nothing
+      if isopen(self.pool[i])
+        close(self.pool[i])
+      end
+      self.pool[i] = nothing
     end
     i += 1
   end
@@ -66,7 +70,9 @@ function destroy(self::SockPool)
     if x == nothing
       continue
     end
-    close(x)
+    if isopen(x)
+      close(x)
+    end
   end
   nothing
 end

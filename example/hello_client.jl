@@ -4,7 +4,8 @@ using MsgPackRpcClient
 
 sock_pool = MsgPackRpcClientSockPool.new()
 typeof(sock_pool) |> println
-MsgPackRpcClientSockPool.add_port(sock_pool, 5000)
+# MsgPackRpcClientSockPool.add_port(sock_pool, 5000)
+MsgPackRpcClientSockPool.add_port_range(sock_pool, 5000:5000)
 MsgPackRpcClientSockPool.show(sock_pool)
 MsgPackRpcClientSockPool.destroy(sock_pool)
 MsgPackRpcClientSockPool.show(sock_pool)
