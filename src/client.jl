@@ -19,7 +19,8 @@ const ARGUMENT_ERROR  = 0x02
 # end
 
 type Session
-  sock          :: Base.TcpSocket
+  sock          :: Union(Base.TcpSocket, Nothing)
+  sock_pool     :: Union(MsgPackRpcClientSockPool.SockPool, Nothing)
   # transport :: Transport
 #  auto_coercing :: Bool
   next_id       :: Int32
@@ -44,12 +45,26 @@ end
 #   s = Session(socket, false, 0)
 #   call(s, "get", "foo", 0, [])
 function call(s::Session, method::String, params...)
+  if s.sock_pool == nothing
+    s.sock_pool = MsgPackRpcClientSockPool.new()
+  end
+  if s.sock == nothing
+    try
+      s.sock = MsgPackRpcClientSockPool.pop(s.sock_pool)
+    catch
+      MsgPackRpcClientSockPool.add_port_range(sock_pool, 5000:5000)
+    end
+  else
+    MsgPackRpcClientSockPool.push(s.sock_pool, s.sock)
+  end
+
   msg_id = s.next_id
   if s.next_id == 1<<31
     s.next_id = 0
   else
     s.next_id += 1
   end
+
   send_request(s.sock, msg_id, method, params)
   receive_response(s.sock, msg_id)
 end

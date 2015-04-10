@@ -31,6 +31,10 @@ function push(self::SockPool, sock::Base.TcpSocket)
   self
 end
 
+function pop(self::SockPool)
+  pop!(self.pool)
+end
+
 function add_port(self::SockPool, port::Int)
   if activate == true
     sock = connect(port)
