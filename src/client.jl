@@ -13,6 +13,8 @@ const NOTIFY   = 2  # [2, method, param]
 const NO_METHOD_ERROR = 0x01
 const ARGUMENT_ERROR  = 0x02
 
+const DEFAULT_PORT_NUMBER = 5000
+
 # type Transport
 #   address
 #   sock_pool :: MsgPackRpcClientSockPool
@@ -52,10 +54,11 @@ function call(s::Session, method::String, params...)
     try
       s.sock = MsgPackRpcClientSockPool.pop(s.sock_pool)
     catch
-      MsgPackRpcClientSockPool.add_port_range(sock_pool, 5000:5000)
+      MsgPackRpcClientSockPool.add_port_range(sock_pool, DEFAULT_PORT_NUMBER:DEFAULT_PORT_NUMBER)
+      s.sock = MsgPackRpcClientSockPool.pop(s.sock_pool)
     end
-  else
-    MsgPackRpcClientSockPool.push(s.sock_pool, s.sock)
+  # else
+  #   MsgPackRpcClientSockPool.push(s.sock_pool, s.sock)
   end
 
   msg_id = s.next_id

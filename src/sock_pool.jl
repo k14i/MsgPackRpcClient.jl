@@ -2,6 +2,8 @@ module MsgPackRpcClientSockPool
 
 export SockPool
 
+const DEFAULT_PORT_NUMBER = 5000
+
 type SockPool
   pool :: Array
 end
@@ -31,14 +33,23 @@ function push(self::SockPool, sock::Base.TcpSocket)
   self
 end
 
-function pop(self::SockPool)
-  pop!(self.pool)
+function pop(self::SockPool; or_create = true, port::Int = DEFAULT_PORT_NUMBER)
+  try
+    sock = pop!(self.pool)
+    return sock
+  catch
+  end
+  if or_create == true
+    try
+      return connect(port)
+    catch
+    end
+  end
+  return nothing
 end
 
-function add_port(self::SockPool, port::Int)
-  if activate == true
-    sock = connect(port)
-  end
+function add_port(self::SockPool, port::Int = DEFAULT_PORT_NUMBER)
+  sock = connect(port)
   push!(self.pool, sock)
   self
 end
