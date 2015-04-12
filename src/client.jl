@@ -13,6 +13,8 @@ const NOTIFY   = 2  # [2, method, param]
 const NO_METHOD_ERROR = 0x01
 const ARGUMENT_ERROR  = 0x02
 
+const TIMEOUT_IN_SEC = 30
+
 # type Transport
 #   address
 #   sock_pool :: MsgPackRpcClientSockPool
@@ -80,26 +82,29 @@ function send_request(sock::Base.TcpSocket, msg_id::Int32, method::String, args)
 end
 
 function send_data(sock::Base.TcpSocket, data)
-  # TODO: Use sockpool
   write(sock, data)
 end
 
-function receive_response(sock::Base.TcpSocket, msg_id::Int32)
+function receive_response(sock::Base.TcpSocket, msg_id::Int32; timeout = TIMEOUT_IN_SEC, interval = 1)
   future = Future(false, nothing, nothing)
   packed_data = receive_data(sock, future)
   if future.is_set == false
   end
   unpacked_data = MsgPack.unpack(packed_data)
-  # TODO: Error handlings
-  if unpacked_data[1] != RESPONSE  # type
-  end
-  if unpacked_data[2] != msg_id # msgid
+  while 0 <= timeout
+    if unpacked_data[1] != RESPONSE || unpacked_data[2] != msg_id # type, msgid
+      timeout -= interval
+      sleep(interval)
+      continue
+    else
+      break
+    end
+    return nothing
   end
   if unpacked_data[3] != nothing  # error
+    return unpacked_data[3]
   end
-  if length(unpacked_data[4]) == 0  # result
-  end
-  unpacked_data[4]
+  unpacked_data[4] # result
 end
 
 function receive_data(sock::Base.TcpSocket, future::Future)
