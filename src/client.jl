@@ -87,11 +87,13 @@ end
 
 function receive_response(sock::Base.TcpSocket, msg_id::Int32; timeout = TIMEOUT_IN_SEC, interval = 1)
   future = Future(false, nothing, nothing)
-  packed_data = receive_data(sock, future)
-  if future.is_set == false
-  end
-  unpacked_data = MsgPack.unpack(packed_data)
+  unpacked_data = {}
+
   while 0 <= timeout
+    packed_data = receive_data(sock, future)
+    if future.is_set == false
+    end
+    unpacked_data = MsgPack.unpack(packed_data)
     if unpacked_data[1] != RESPONSE || unpacked_data[2] != msg_id # type, msgid
       timeout -= interval
       sleep(interval)
@@ -101,9 +103,11 @@ function receive_response(sock::Base.TcpSocket, msg_id::Int32; timeout = TIMEOUT
     end
     return nothing
   end
+
   if unpacked_data[3] != nothing  # error
     return unpacked_data[3]
   end
+
   unpacked_data[4] # result
 end
 
