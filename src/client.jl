@@ -80,9 +80,9 @@ function call(s::Session, method::String, params...; sync = false)
   future = send_request(s.sock, msg_id, method, params)
 
   if sync == true
-    return receive_response(s.sock, msg_id, future)
+    return receive_response(s.sock, future)
   else
-      @async receive_response(s.sock, msg_id, future)
+    @async receive_response(s.sock, future)
     return future
   end
 end
@@ -101,7 +101,7 @@ function send_data(sock::Base.TcpSocket, data)
   write(sock, data)
 end
 
-function receive_response(sock::Base.TcpSocket, msg_id::Int, future::Future; timeout = TIMEOUT_IN_SEC, interval = 1)
+function receive_response(sock::Base.TcpSocket, future::Future; timeout = TIMEOUT_IN_SEC, interval = 1)
   unpacked_data = {}
 
   while 0 <= timeout
@@ -112,8 +112,8 @@ function receive_response(sock::Base.TcpSocket, msg_id::Int, future::Future; tim
       # continue
     end
     unpacked_data = MsgPack.unpack(future.raw)
-    if unpacked_data[1] != RESPONSE || unpacked_data[2] != msg_id # type, msgid
-#println("unpacked_data[2] = ", unpacked_data[2], ", msg_id = ", msg_id)
+    if unpacked_data[1] != RESPONSE || unpacked_data[2] != future.msg_id # type, msgid
+#println("unpacked_data[2] = ", unpacked_data[2], ", msg_id = ", future.msg_id)
       timeout -= interval
       sleep(interval)
       continue
