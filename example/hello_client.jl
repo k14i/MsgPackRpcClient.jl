@@ -24,11 +24,19 @@ using MsgPackRpcClient
 # sock = connect(5000)
 session = MsgPackRpcClient.Session(nothing, nothing, 1)
 
-for i in 1:1000
-  ret  = MsgPackRpcClient.call(session, "hello")
+# for i in 1:1
+#   ret  = MsgPackRpcClient.call(session, "hello"; sync = true)
+#   println(i, ": ",  ret, ", next_id = ", session.next_id)
+# #  ret0 = MsgPackRpcClient.call(session, "hello0") |> println
+# #  ret1 = MsgPackRpcClient.call(session, "hello1") |> println
+# end
+
+for i in 1:1
+  future  = MsgPackRpcClient.call(session, "hello"; sync = false)
+#  sleep(1)
+  ret  = MsgPackRpcClient.receive_response(session.sock, session.next_id - 1, future)
   println(i, ": ",  ret, ", next_id = ", session.next_id)
-#  ret0 = MsgPackRpcClient.call(session, "hello0") |> println
-#  ret1 = MsgPackRpcClient.call(session, "hello1") |> println
+  # println(i, ": ",  future)
 end
 
 close(session.sock)
