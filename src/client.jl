@@ -29,11 +29,11 @@ type Session
   next_id       :: Int
 end
 
-type Result
-  msg_id :: Int
-  result :: Any
-  error  :: Any
-end
+# type Result
+#   msg_id :: Int
+#   result :: Any
+#   error  :: Any
+# end
 
 type Future
   timeout :: Any
