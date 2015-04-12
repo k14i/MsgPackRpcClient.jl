@@ -45,6 +45,7 @@ type Future
   error  :: Any
   result :: Any
   raw :: Any
+  msg_id :: Int
 end
 
 # function coerce_uint()
@@ -69,7 +70,7 @@ function call(s::Session, method::String, params...; sync = false)
   end
 
   msg_id = s.next_id
-  # For compatibility, msgid must be Int32
+  # NOTE: For compatibility, msgid must be Int32
   if s.next_id == 1<<31
     s.next_id = 0
   else
@@ -81,6 +82,7 @@ function call(s::Session, method::String, params...; sync = false)
   if sync == true
     return receive_response(s.sock, msg_id, future)
   else
+      @async receive_response(s.sock, msg_id, future)
     return future
   end
 end
@@ -92,7 +94,7 @@ function send_request(sock::Base.TcpSocket, msg_id::Int, method::String, args)
   end
   packed_data = MsgPack.pack([REQUEST, msg_id, method, params])
   send_data(sock, packed_data)
-  future = Future(nothing, nothing, nothing, nothing, nothing, false, nothing, nothing, nothing)
+  future = Future(nothing, nothing, nothing, nothing, nothing, false, nothing, nothing, nothing, msg_id)
 end
 
 function send_data(sock::Base.TcpSocket, data)
@@ -111,7 +113,7 @@ function receive_response(sock::Base.TcpSocket, msg_id::Int, future::Future; tim
     end
     unpacked_data = MsgPack.unpack(future.raw)
     if unpacked_data[1] != RESPONSE || unpacked_data[2] != msg_id # type, msgid
-println("unpacked_data[2] = ", unpacked_data[2], ", msg_id = ", msg_id)
+#println("unpacked_data[2] = ", unpacked_data[2], ", msg_id = ", msg_id)
       timeout -= interval
       sleep(interval)
       continue
@@ -122,29 +124,25 @@ println("unpacked_data[2] = ", unpacked_data[2], ", msg_id = ", msg_id)
   end
 
   if unpacked_data[3] != nothing  # error
-    return unpacked_data[3]
+    return future.error = unpacked_data[3]
   end
 
-  unpacked_data[4] # result
+  future.result = unpacked_data[4] # result
 end
 
 function receive_data(sock::Base.TcpSocket, future::Future)
-#  join(sock, future)
-  future.raw = readavailable(sock)
-  # if length(future.raw) > 0
-  #   future.is_set == true
-  # end
-  # future.raw
+  future = join(sock, future)
+  future.raw
 end
 
 function join(sock::Base.TcpSocket, future::Future)
   while future.is_set == false
     future.raw = readavailable(sock)
     if length(future.raw) > 0
-      future.is_set == true
+      future.is_set = true
       break
     end
-    sleep(0.1)
+    sleep(0.0375)
     # TODO: Implement timeout
   end
   return future

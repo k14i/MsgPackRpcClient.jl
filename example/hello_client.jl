@@ -31,12 +31,16 @@ session = MsgPackRpcClient.Session(nothing, nothing, 1)
 # #  ret1 = MsgPackRpcClient.call(session, "hello1") |> println
 # end
 
-for i in 1:1
+futures = {}
+
+for i in 1:10
   future  = MsgPackRpcClient.call(session, "hello"; sync = false)
-#  sleep(1)
-  ret  = MsgPackRpcClient.receive_response(session.sock, session.next_id - 1, future)
-  println(i, ": ",  ret, ", next_id = ", session.next_id)
-  # println(i, ": ",  future)
+  sleep(0.0375)
+  push!(futures, future)
+end
+
+for f in futures
+  println(f.result, ", msg_id = ", f.msg_id, ", is_set = ", f.is_set)
 end
 
 close(session.sock)
