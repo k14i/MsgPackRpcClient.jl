@@ -35,6 +35,11 @@ type Result
 end
 
 type Future
+  timeout :: Any
+  loop :: Any
+  callback_handler :: Any
+  error_handler :: Any
+  result_handler :: Any
   is_set :: Bool
   error  :: Any
   result :: Any
@@ -68,8 +73,8 @@ function call(s::Session, method::String, params...)
     s.next_id += 1
   end
 
-  send_request(s.sock, msg_id, method, params)
-  receive_response(s.sock, msg_id)
+  future = send_request(s.sock, msg_id, method, params)
+  receive_response(s.sock, msg_id, future)
 end
 
 function send_request(sock::Base.TcpSocket, msg_id::Int32, method::String, args)
@@ -79,14 +84,14 @@ function send_request(sock::Base.TcpSocket, msg_id::Int32, method::String, args)
   end
   packed_data = MsgPack.pack([REQUEST, msg_id, method, params])
   send_data(sock, packed_data)
+  future = Future(nothing, nothing, nothing, nothing, nothing, false, nothing, nothing)
 end
 
 function send_data(sock::Base.TcpSocket, data)
   write(sock, data)
 end
 
-function receive_response(sock::Base.TcpSocket, msg_id::Int32; timeout = TIMEOUT_IN_SEC, interval = 1)
-  future = Future(false, nothing, nothing)
+function receive_response(sock::Base.TcpSocket, msg_id::Int32, future::Future; timeout = TIMEOUT_IN_SEC, interval = 1)
   unpacked_data = {}
 
   while 0 <= timeout
