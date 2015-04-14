@@ -33,18 +33,20 @@ session = MsgPackRpcClient.Session(nothing, nothing, 1)
 
 futures = {}
 
-for i in 1:500
+for i in 1:3
   future  = MsgPackRpcClient.call(session, "hello"; sync = false)
 #  sleep(0.0375)
+#  sleep(0.1)
   push!(futures, future)
 end
 
 #sleep(5)
 
 for f in futures
-  if f.result == nothing
+#  if f.result != nothing
+#  if f.is_set == true
     println(f.result, ", msg_id = ", f.msg_id, ", is_set = ", f.is_set)
-  end
+#  end
 end
 
 close(session.sock)

@@ -136,19 +136,28 @@ function receive_data(sock::Base.TcpSocket, future::Future)
 end
 
 function join(sock::Base.TcpSocket, future::Future; timeout = TIMEOUT_IN_SEC, interval = 1)
+#write(STDOUT," [Debug: join()] ")
   while future.is_set == false
     if timeout <= 0
+#write(STDOUT," [Debug: timeout] ")
       break
     end
+#write(STDOUT," [Debug: readavailable(sock) start with msg_id ", future.msg_id, " ] \n")
+#write(STDOUT," [msg_id = ", future.msg_id, "] \n")
     future.raw = readavailable(sock)
+#write(STDOUT," [Debug: readavailable(sock) got ", future.raw, " ] \n")
+write(STDOUT," [raw = ", future.raw, "] \n")
 #    sleep(0.0375)
     if length(future.raw) > 0
       future.is_set = true
       break
+#else
+#write(STDOUT, " [Debug: future.is_set is still false] ")
     end
     sleep(interval)
     timeout -= interval
   end
+#write(STDOUT," [Debug: return future] ")
   return future
 end
 
