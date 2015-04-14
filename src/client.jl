@@ -135,15 +135,19 @@ function receive_data(sock::Base.TcpSocket, future::Future)
   future.raw
 end
 
-function join(sock::Base.TcpSocket, future::Future)
+function join(sock::Base.TcpSocket, future::Future; timeout = TIMEOUT_IN_SEC, interval = 1)
   while future.is_set == false
+    if timeout <= 0
+      break
+    end
     future.raw = readavailable(sock)
+#    sleep(0.0375)
     if length(future.raw) > 0
       future.is_set = true
       break
     end
-    sleep(0.0375)
-    # TODO: Implement timeout
+    sleep(interval)
+    timeout -= interval
   end
   return future
 end
