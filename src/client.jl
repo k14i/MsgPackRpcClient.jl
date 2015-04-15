@@ -82,7 +82,10 @@ function call(s::Session, method::String, params...; sync = false)
   if sync == true
     return receive_response(s.sock, future)
   else
-    @async receive_response(s.sock, future)
+    @sync begin
+      @async receive_response(s.sock, future)
+#      @spawn receive_response(s.sock, future)
+    end
     return future
   end
 end
@@ -146,7 +149,7 @@ function join(sock::Base.TcpSocket, future::Future; timeout = TIMEOUT_IN_SEC, in
 #write(STDOUT," [msg_id = ", future.msg_id, "] \n")
     future.raw = readavailable(sock)
 #write(STDOUT," [Debug: readavailable(sock) got ", future.raw, " ] \n")
-write(STDOUT," [raw = ", future.raw, "] \n")
+#write(STDOUT," [raw = ", future.raw, "] \n")
 #    sleep(0.0375)
     if length(future.raw) > 0
       future.is_set = true
