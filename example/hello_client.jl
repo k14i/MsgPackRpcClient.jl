@@ -24,29 +24,41 @@ using MsgPackRpcClient
 # sock = connect(5000)
 session = MsgPackRpcClient.Session(nothing, nothing, 1)
 
-# for i in 1:1
+# for i in 1:100000
 #   ret  = MsgPackRpcClient.call(session, "hello"; sync = true)
-#   println(i, ": ",  ret, ", next_id = ", session.next_id)
+# #  println(i, ": ",  ret, ", next_id = ", session.next_id)
 # #  ret0 = MsgPackRpcClient.call(session, "hello0") |> println
 # #  ret1 = MsgPackRpcClient.call(session, "hello1") |> println
 # end
 
 futures = {}
 
-for i in 1:3
+@sync begin
+@async for i in 1:1000
+#  @sync begin
+#  @async begin
   future  = MsgPackRpcClient.call(session, "hello"; sync = false)
 #  sleep(0.0375)
 #  sleep(0.1)
+  wait(future.task)
   push!(futures, future)
+#  end
+#  end
+end
 end
 
 #sleep(5)
 
-for f in futures
-#  if f.result != nothing
+@sync begin
+@async for f in futures
+  wait(f.task)
+#  println(f.task)
+
+  #if f.result == nothing
 #  if f.is_set == true
     println(f.result, ", msg_id = ", f.msg_id, ", is_set = ", f.is_set)
 #  end
+end
 end
 
 close(session.sock)

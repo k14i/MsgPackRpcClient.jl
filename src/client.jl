@@ -46,6 +46,7 @@ type Future
   result :: Any
   raw :: Any
   msg_id :: Int
+  task :: Union(Task, Nothing)
 end
 
 # function coerce_uint()
@@ -82,10 +83,10 @@ function call(s::Session, method::String, params...; sync = false)
   if sync == true
     return receive_response(s.sock, future)
   else
-    @sync begin
-      @async receive_response(s.sock, future)
+#    @sync begin
+      future.task = @async receive_response(s.sock, future)
 #      @spawn receive_response(s.sock, future)
-    end
+#    end
     return future
   end
 end
@@ -97,7 +98,7 @@ function send_request(sock::Base.TcpSocket, msg_id::Int, method::String, args)
   end
   packed_data = MsgPack.pack([REQUEST, msg_id, method, params])
   send_data(sock, packed_data)
-  future = Future(nothing, nothing, nothing, nothing, nothing, false, nothing, nothing, nothing, msg_id)
+  future = Future(nothing, nothing, nothing, nothing, nothing, false, nothing, nothing, nothing, msg_id, nothing)
 end
 
 function send_data(sock::Base.TcpSocket, data)
