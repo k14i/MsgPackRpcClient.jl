@@ -9,7 +9,7 @@ futures = {}
 @sync begin
 @async for i in 1:10000
   future  = MsgPackRpcClient.call(session, "hello"; sync = false)
-  push!(futures, MsgPackRpcClient.get(future, target = :result))
+  push!(futures, MsgPackRpcClient.get(future))
 end
 end
 

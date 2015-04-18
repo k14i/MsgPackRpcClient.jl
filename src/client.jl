@@ -1,3 +1,4 @@
+
 module MsgPackRpcClient
 
 include("sock_pool.jl")
@@ -13,7 +14,7 @@ const NOTIFY   = 2  # [2, method, param]
 const NO_METHOD_ERROR = 0x01
 const ARGUMENT_ERROR  = 0x02
 
-const TIMEOUT_IN_SEC = 3
+const TIMEOUT_IN_SEC = 10
 
 # type Transport
 #   address
@@ -36,8 +37,8 @@ end
 # end
 
 type Future
-  timeout :: Any
-  loop :: Any
+  timeout :: Int
+#  loop :: Any
   callback_handler :: Any
   error_handler :: Any
   result_handler :: Any
@@ -55,7 +56,7 @@ end
 # Example:
 #   s = Session(socket, false, 0)
 #   call(s, "get", "foo", 0, [])
-function call(s::Session, method::String, params...; sync = false)
+function call(s::Session, method::String, params...; sync = true)
   if s.sock_pool == nothing
     s.sock_pool = MsgPackRpcClientSockPool.new()
   end
@@ -81,7 +82,8 @@ function call(s::Session, method::String, params...; sync = false)
   future = send_request(s.sock, msg_id, method, params)
 
   if sync == true
-    return receive_response(s.sock, future)
+    receive_response(s.sock, future)
+    return get(future)
   else
     future.task = @async receive_response(s.sock, future)
     return future
@@ -95,23 +97,38 @@ function send_request(sock::Base.TcpSocket, msg_id::Int, method::String, args)
   end
   packed_data = MsgPack.pack([REQUEST, msg_id, method, params])
   send_data(sock, packed_data)
-  future = Future(nothing, nothing, nothing, nothing, nothing, false, nothing, nothing, nothing, msg_id, nothing)
+  Future(TIMEOUT_IN_SEC, nothing, nothing, nothing, false, nothing, nothing, nothing, msg_id, nothing)
 end
 
 function send_data(sock::Base.TcpSocket, data)
   write(sock, data)
+  nothing
 end
 
-function get(future::Future; target = :future)
-  wait(future.task)
-  if target == :future
-    return future
+function get(future::Future)
+  if future.task != nothing
+    wait(future.task)
   end
-  return future.result
+  if future.error == nothing
+    # if future.result_handler != nothing
+    #   return result_handler.call()
+    # end
+    return future.result
+  end
+  if future.result == nothing
+    # TODO: raise instead of return
+    return nothing
+  end
+  # if future.error_handler != nothing
+  #   return error_handler.call()
+  # end
+  # TODO: raise instead of return
+  nothing
 end
 
-function receive_response(sock::Base.TcpSocket, future::Future; timeout = TIMEOUT_IN_SEC, interval = 1)
+function receive_response(sock::Base.TcpSocket, future::Future; interval = 1)
   unpacked_data = {}
+  timeout = future.timeout
 
   while 0 <= timeout
     receive_data(sock, future)
@@ -132,41 +149,33 @@ function receive_response(sock::Base.TcpSocket, future::Future; timeout = TIMEOU
   end
 
   if unpacked_data[3] != nothing  # error
-    return future.error = unpacked_data[3]
+    future.error = unpacked_data[3]
   end
 
-  future.result = unpacked_data[4] # result
+  if unpacked_data[4] != nothing #result
+    future.result = unpacked_data[4]
+  end
+
+  future
 end
 
 function receive_data(sock::Base.TcpSocket, future::Future)
-  future = join(sock, future)
-  future.raw
+  join(sock, future)
+  nothing
 end
 
-function join(sock::Base.TcpSocket, future::Future; timeout = TIMEOUT_IN_SEC, interval = 1)
-#write(STDOUT," [Debug: join()] ")
-  while future.is_set == false
-    if timeout <= 0
-#write(STDOUT," [Debug: timeout] ")
-      break
-    end
-#write(STDOUT," [Debug: readavailable(sock) start with msg_id ", future.msg_id, " ] \n")
-#write(STDOUT," [msg_id = ", future.msg_id, "] \n")
+function join(sock::Base.TcpSocket, future::Future; interval = 1)
+  timeout = future.timeout
+  while future.is_set == false && timeout > 0
     future.raw = readavailable(sock)
-#write(STDOUT," [Debug: readavailable(sock) got ", future.raw, " ] \n")
-#write(STDOUT," [raw = ", future.raw, "] \n")
-#    sleep(0.0375)
     if length(future.raw) > 0
       future.is_set = true
       break
-#else
-#write(STDOUT, " [Debug: future.is_set is still false] ")
     end
     sleep(interval)
     timeout -= interval
   end
-#write(STDOUT," [Debug: return future] ")
-  return future
+  future
 end
 
 end # module client
