@@ -1,4 +1,4 @@
-include("../src/client.jl")
+include("../src/MsgPackRpcClient.jl")
 
 using MsgPackRpcClient
 
