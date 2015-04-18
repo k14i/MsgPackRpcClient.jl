@@ -2,14 +2,14 @@ include("../src/client.jl")
 
 using MsgPackRpcClient
 
-session = MsgPackRpcClient.Session(nothing, nothing, 1)
+session = Session(nothing, nothing, 1)
 
 futures = {}
 
 @sync begin
 @async for i in 1:10000
-  future  = MsgPackRpcClient.call(session, "hello"; sync = false)
-  push!(futures, MsgPackRpcClient.get(future))
+  future  = call(session, "hello"; sync = false)
+  push!(futures, get(future))
 end
 end
 

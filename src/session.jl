@@ -1,3 +1,18 @@
+# module MagPackRpcClientSession
+
+# include("sock_pool.jl")
+
+# export Session
+
+type Session
+  sock      :: Union(Base.TcpSocket, Nothing)
+  sock_pool :: Union(MsgPackRpcClientSockPool.SockPool, Nothing)
+  next_id   :: Int
+end
+
+# end # module MagPackRpcClientSession
+
+
 # module session
 # 
 # export Session

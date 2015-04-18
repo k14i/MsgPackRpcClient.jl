@@ -1,54 +1,25 @@
-
 module MsgPackRpcClient
 
+include("const.jl")
 include("sock_pool.jl")
+include("session.jl")
+include("future.jl")
 
 using MsgPack
 # using Reactive
 
-export Session, call, MsgPackRpcClientSockPool
-
-const REQUEST  = 0  # [0, msgid, method, param]
-const RESPONSE = 1  # [1, msgid, error, result]
-const NOTIFY   = 2  # [2, method, param]
-const NO_METHOD_ERROR = 0x01
-const ARGUMENT_ERROR  = 0x02
-
-const TIMEOUT_IN_SEC = 10
+export Session, call, get #, MsgPackRpcClientSockPool
 
 # type Transport
 #   address
 #   sock_pool :: MsgPackRpcClientSockPool
 # end
 
-type Session
-  sock          :: Union(Base.TcpSocket, Nothing)
-  sock_pool     :: Union(MsgPackRpcClientSockPool.SockPool, Nothing)
-  # transport :: Transport
-#  auto_coercing :: Bool
-#  reqtable      :: Array
-  next_id       :: Int
-end
-
 # type Result
 #   msg_id :: Int
 #   result :: Any
 #   error  :: Any
 # end
-
-type Future
-  timeout :: Int
-#  loop :: Any
-  callback_handler :: Any
-  error_handler :: Any
-  result_handler :: Any
-  is_set :: Bool
-  error  :: Any
-  result :: Any
-  raw :: Any
-  msg_id :: Int
-  task :: Union(Task, Nothing)
-end
 
 # function coerce_uint()
 # end

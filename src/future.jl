@@ -1,3 +1,17 @@
+type Future
+  timeout          :: Int
+  callback_handler :: Any
+  error_handler    :: Any
+  result_handler   :: Any
+  is_set           :: Bool
+  error            :: Any
+  result           :: Any
+  raw              :: Any
+  msg_id           :: Int
+  task             :: Union(Task, Nothing)
+end
+
+
 # module future
 # 
 # export Future
