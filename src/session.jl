@@ -11,12 +11,12 @@ type Session
   destroy   :: Function
 
   function Session(sock, sock_pool, next_id)
-    this = new()
-    this.sock = sock
+    this           = new()
+    this.sock      = sock
     this.sock_pool = sock_pool
-    this.next_id = next_id
-    this.create = function() create() end
-    this.destroy = function() destroy(this) end
+    this.next_id   = next_id
+    this.create    = function() create() end
+    this.destroy   = function() destroy(this) end
     this
   end
 end

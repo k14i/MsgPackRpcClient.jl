@@ -79,16 +79,20 @@ function delete(self::SockPool, sock::Base.TcpSocket)
 end
 
 function destroy(self::SockPool)
-  if is_empty(self)
-    return true
-  end
-  for x in self.pool
-    if x == nothing
-      continue
+  try
+    if is_empty(self)
+      return true
     end
-    if isopen(x)
-      close(x)
+    for x in self.pool
+      if x == nothing
+        continue
+      end
+      if isopen(x)
+        close(x)
+      end
     end
+  catch
+    return false
   end
   true
 end

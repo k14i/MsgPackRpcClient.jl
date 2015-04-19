@@ -7,7 +7,7 @@ session = MsgPackRpcClientSession.create() # MsgPackRpcClientSession.Session(not
 results = {}
 
 for i in 1:10000
-  result = MsgPackRpcClient.call(session, "hello"; sync = true)
+  result = MsgPackRpcClient.call(session, "hello")
   push!(results, result)
 end
 
