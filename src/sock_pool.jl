@@ -58,8 +58,12 @@ end
 function connect_in_port_range_and_push!(self::SockPool,
                                          host::String = "localhost",
                                          range::UnitRange = DEFAULT_PORT_NUMBER:DEFAULT_PORT_NUMBER)
-  for port = range
-    connect_and_push!(self, host, port)
+  @sync begin
+    @async begin
+      for port = range
+        connect_and_push!(self, host, port)
+      end
+    end
   end
   self
 end
