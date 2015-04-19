@@ -6,28 +6,18 @@ include("session.jl")
 include("future.jl")
 
 using MsgPack
-# using Reactive
 
-export Session, call, get #, MsgPackRpcClientSockPool
+export MsgPackRpcClientSession, call, get #, MsgPackRpcClientSockPool
 
 # type Transport
 #   address
 #   sock_pool :: MsgPackRpcClientSockPool
 # end
 
-# type Result
-#   msg_id :: Int
-#   result :: Any
-#   error  :: Any
-# end
-
-# function coerce_uint()
-# end
-
 # Example:
 #   s = Session(socket, false, 0)
 #   call(s, "get", "foo", 0, [])
-function call(s::Session, method::String, params...; sync = true)
+function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = true)
   if s.sock_pool == nothing
     s.sock_pool = MsgPackRpcClientSockPool.new()
   end
@@ -38,8 +28,6 @@ function call(s::Session, method::String, params...; sync = true)
       MsgPackRpcClientSockPool.add_port(sock_pool)
       s.sock = MsgPackRpcClientSockPool.pop(s.sock_pool)
     end
-  # else
-  #   MsgPackRpcClientSockPool.push(s.sock_pool, s.sock)
   end
 
   msg_id = s.next_id

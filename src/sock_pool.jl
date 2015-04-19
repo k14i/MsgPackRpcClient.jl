@@ -1,8 +1,8 @@
 module MsgPackRpcClientSockPool
 
-export SockPool
+#export SockPool
 
-const DEFAULT_PORT_NUMBER = 5000
+include("const.jl")
 
 type SockPool
   pool :: Array
@@ -38,14 +38,16 @@ function pop(self::SockPool; or_create = true, port::Int = DEFAULT_PORT_NUMBER)
     sock = pop!(self.pool)
     return sock
   catch
+    # TODO: Add error handling
   end
   if or_create == true
     try
       return connect(port)
     catch
+      # TODO: Add error handling
     end
   end
-  return nothing
+  nothing
 end
 
 function add_port(self::SockPool, port::Int = DEFAULT_PORT_NUMBER)
@@ -78,7 +80,7 @@ end
 
 function destroy(self::SockPool)
   if is_empty(self)
-    return nothing
+    return true
   end
   for x in self.pool
     if x == nothing
@@ -88,7 +90,7 @@ function destroy(self::SockPool)
       close(x)
     end
   end
-  nothing
+  true
 end
 
 end # module MsgPackRpcClientSockPool

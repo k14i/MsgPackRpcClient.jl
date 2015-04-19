@@ -2,7 +2,7 @@ include("../src/MsgPackRpcClient.jl")
 
 using MsgPackRpcClient
 
-session = Session(nothing, nothing, 1)
+session = MsgPackRpcClientSession.create()
 
 futures = {}
 
@@ -20,4 +20,4 @@ end
 end
 end
 
-close(session.sock)
+session.destroy()

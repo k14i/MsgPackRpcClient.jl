@@ -2,7 +2,7 @@ include("../src/MsgPackRpcClient.jl")
 
 using MsgPackRpcClient
 
-session = MsgPackRpcClient.Session(nothing, nothing, 1)
+session = MsgPackRpcClientSession.create() # MsgPackRpcClientSession.Session(nothing, nothing, 1)
 
 results = {}
 
@@ -15,4 +15,4 @@ for result in results
   println(result)
 end
 
-close(session.sock)
+session.destroy() # MsgPackRpcClientSession.destroy(session)

@@ -1,16 +1,46 @@
-# module MagPackRpcClientSession
+module MsgPackRpcClientSession
 
-# include("sock_pool.jl")
-
-# export Session
+include("sock_pool.jl")
 
 type Session
   sock      :: Union(Base.TcpSocket, Nothing)
-  sock_pool :: Union(MsgPackRpcClientSockPool.SockPool, Nothing)
+  sock_pool :: Any #Union(MsgPackRpcClientSockPool.SockPool, Nothing)
   next_id   :: Int
+
+  create    :: Function
+  destroy   :: Function
+
+  function Session(sock, sock_pool, next_id)
+    this = new()
+    this.sock = sock
+    this.sock_pool = sock_pool
+    this.next_id = next_id
+    this.create = function() create() end
+    this.destroy = function() destroy(this) end
+    this
+  end
 end
 
-# end # module MagPackRpcClientSession
+function create()
+  Session(nothing, nothing, 1)
+end
+
+function destroy(self::Session)
+  try
+    if self.sock != nothing
+      close(self.sock)
+    end
+    if self.sock_pool != nothing
+      MsgPackRpcClientSockPool.destroy(self.sock_pool)
+    end
+    next_id = 1
+  catch
+    return false
+  end
+  true
+end
+
+end # module MagPackRpcClientSession
 
 
 # module session
