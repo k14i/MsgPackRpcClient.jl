@@ -14,19 +14,16 @@ export MsgPackRpcClientSession, call, get #, MsgPackRpcClientSockPool
 #   sock_pool :: MsgPackRpcClientSockPool
 # end
 
-# Example:
-#   s = Session(socket, false, 0)
-#   call(s, "get", "foo", 0, [])
 function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = true)
   if s.sock_pool == nothing
     s.sock_pool = MsgPackRpcClientSockPool.new()
   end
   if s.sock == nothing
     try
-      s.sock = MsgPackRpcClientSockPool.pop(s.sock_pool)
+      s.sock = MsgPackRpcClientSockPool.pop!(s.sock_pool)
     catch
-      MsgPackRpcClientSockPool.add_port(sock_pool)
-      s.sock = MsgPackRpcClientSockPool.pop(s.sock_pool)
+      MsgPackRpcClientSockPool.connect_and_push!(sock_pool)
+      s.sock = MsgPackRpcClientSockPool.pop!(s.sock_pool)
     end
   end
 

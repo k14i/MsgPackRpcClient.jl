@@ -9,7 +9,7 @@ type SockPool
 end
 
 function new()
-  SockPool(Union(Base.TcpSocket, Nothing)[])
+  SockPool(Union(Base.TcpSocket, Base.UdpSocket, Nothing)[])
 end
 
 function show(self::SockPool)
@@ -28,12 +28,12 @@ end
 function reject!(self::SockPool)
 end
 
-function push(self::SockPool, sock::Base.TcpSocket)
+function push!(self::SockPool, sock::Union(Base.TcpSocket, Base.UdpSocket))
   push!(self.pool, sock)
   self
 end
 
-function pop(self::SockPool; or_create = true, port::Int = DEFAULT_PORT_NUMBER)
+function pop!(self::SockPool; or_create = true, port::Int = DEFAULT_PORT_NUMBER)
   try
     sock = pop!(self.pool)
     return sock
@@ -50,16 +50,16 @@ function pop(self::SockPool; or_create = true, port::Int = DEFAULT_PORT_NUMBER)
   nothing
 end
 
-function add_port(self::SockPool, port::Int = DEFAULT_PORT_NUMBER)
-  sock = connect(port)
-  push!(self.pool, sock)
+function connect_and_push!(self::SockPool, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
+  push!(self.pool, connect(host, port))
   self
 end
 
-function add_port_range(self::SockPool, range::UnitRange)
-  for x = range
-    sock = connect(x)
-    push!(self.pool, sock)
+function connect_in_port_range_and_push!(self::SockPool,
+                                         host::String = "localhost",
+                                         range::UnitRange = DEFAULT_PORT_NUMBER:DEFAULT_PORT_NUMBER)
+  for port = range
+    connect_and_push!(self, host, port)
   end
   self
 end

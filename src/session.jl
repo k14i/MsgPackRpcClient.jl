@@ -3,26 +3,26 @@ module MsgPackRpcClientSession
 include("sock_pool.jl")
 
 type Session
-  sock      :: Union(Base.TcpSocket, Nothing)
+  sock      :: Union(Base.TcpSocket, Base.UdpSocket, Nothing)
   sock_pool :: Any #Union(MsgPackRpcClientSockPool.SockPool, Nothing)
   next_id   :: Int
 
   create    :: Function
   destroy   :: Function
 
-  function Session(sock, sock_pool, next_id)
+  function Session(sock = nothing, sock_pool = nothing, next_id = 1)
     this           = new()
     this.sock      = sock
     this.sock_pool = sock_pool
     this.next_id   = next_id
-    this.create    = function() create() end
+    this.create    = function() create(sock, sock_pool, next_id) end
     this.destroy   = function() destroy(this) end
     this
   end
 end
 
-function create()
-  Session(nothing, nothing, 1)
+function create(sock = nothing, sock_pool = nothing, next_id = 1)
+  Session(sock, sock_pool, next_id)
 end
 
 function destroy(self::Session)
