@@ -25,28 +25,30 @@ function is_empty(self::SockPool)
   end
 end
 
-function reject!(self::SockPool)
-end
+#function reject!(self::SockPool)
+#end
 
 function push!(self::SockPool, sock::Union(Base.TcpSocket, Base.UdpSocket))
   push!(self.pool, sock)
   self
 end
 
-function pop!(self::SockPool; or_create = true, port::Int = DEFAULT_PORT_NUMBER)
+function pop!(self::SockPool; or_create = true, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
   try
     sock = pop!(self.pool)
     return sock
   catch
     # TODO: Add error handling
   end
+
   if or_create == true
     try
-      return connect(port)
+      return connect(host, port)
     catch
       # TODO: Add error handling
     end
   end
+
   nothing
 end
 
@@ -59,10 +61,8 @@ function connect_in_port_range_and_push!(self::SockPool,
                                          host::String = "localhost",
                                          range::UnitRange = DEFAULT_PORT_NUMBER:DEFAULT_PORT_NUMBER)
   @sync begin
-    @async begin
-      for port = range
-        connect_and_push!(self, host, port)
-      end
+    @async for port = range
+      connect_and_push!(self, host, port)
     end
   end
   self
@@ -102,4 +102,3 @@ function destroy(self::SockPool)
 end
 
 end # module MsgPackRpcClientSockPool
-

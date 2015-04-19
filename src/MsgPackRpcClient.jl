@@ -9,11 +9,6 @@ using MsgPack
 
 export MsgPackRpcClientSession, call, get #, MsgPackRpcClientSockPool
 
-# type Transport
-#   address
-#   sock_pool :: MsgPackRpcClientSockPool
-# end
-
 function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = true)
   if s.sock_pool == nothing
     s.sock_pool = MsgPackRpcClientSockPool.new()
@@ -46,18 +41,29 @@ function call(s::MsgPackRpcClientSession.Session, method::String, params...; syn
   end
 end
 
-function send_request(sock::Base.TcpSocket, msg_id::Int, method::String, args)
+function send_request(sock, msg_id::Int, method::String, args)
   params = {}  # NOTE: Equal to ```params = Any[]```, which can grow.
   for x in args
     push!(params, x)
   end
   packed_data = MsgPack.pack([REQUEST, msg_id, method, params])
-  send_data(sock, packed_data)
+  if typeof(sock) == Base.TcpSocket
+    send_data_in_tcp(sock, packed_data)
+  #else if typeof(sock) == Base.UdpSocket
+  #  send_data_in_udp(sock, packed_data, host, port)
+  #else
+  #  # error
+  end
   Future(TIMEOUT_IN_SEC, nothing, nothing, nothing, false, nothing, nothing, nothing, msg_id, nothing)
 end
 
-function send_data(sock::Base.TcpSocket, data)
+function send_data_in_tcp(sock::Base.TcpSocket, data)
   write(sock, data)
+  nothing
+end
+
+function send_data_in_udp(sock::Base.UdpSocket, data, host::String, port::Int)
+  send(sock, host, port, data)
   nothing
 end
 
@@ -82,7 +88,7 @@ function get(future::Future)
   nothing
 end
 
-function receive_response(sock::Base.TcpSocket, future::Future; interval = 1)
+function receive_response(sock, future::Future; interval = 1)
   unpacked_data = {}
   timeout = future.timeout
 
@@ -115,12 +121,12 @@ function receive_response(sock::Base.TcpSocket, future::Future; interval = 1)
   future
 end
 
-function receive_data(sock::Base.TcpSocket, future::Future)
+function receive_data(sock, future::Future)
   join(sock, future)
   nothing
 end
 
-function join(sock::Base.TcpSocket, future::Future; interval = 1)
+function join(sock, future::Future; interval = 1)
   timeout = future.timeout
   while future.is_set == false && timeout > 0
     future.raw = readavailable(sock)
