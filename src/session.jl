@@ -3,9 +3,9 @@ module MsgPackRpcClientSession
 include("sock_pool.jl")
 include("const.jl")
 
+# TODO: Unite sock and sock_pool
 type Session
   sock      :: Union(Base.TcpSocket, Base.UdpSocket, Nothing)
-#  sock_pool :: Any #Union(MsgPackRpcClientSockPool.SockPool, Nothing)
   sock_pool :: MsgPackRpcClientSockPool.SockPool
   next_id   :: Int
 
@@ -37,8 +37,9 @@ type Session
   end
 end
 
-#function create(sock = nothing, sock_pool::Union(MsgPackRpcClientSockPool.SockPool, Array) = {}, next_id = 1)
-function create(sock = nothing, sock_pool::MsgPackRpcClientSockPool.SockPool = MsgPackRpcClientSockPool.SockPool({}), next_id = 1)
+function create(sock = nothing,
+                sock_pool::MsgPackRpcClientSockPool.SockPool = MsgPackRpcClientSockPool.SockPool({}),
+                next_id = 1)
   Session(sock, sock_pool, next_id)
 end
 
@@ -87,13 +88,14 @@ end
 function create_sock(self::Session, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
   sock = connect(host, port)
   if self.sock == nothing
-    self.sock = sock #|> println
+    self.sock = sock
   else
-    MsgPackRpcClientSockPool.enqueue!(self.sock_pool, sock) #|> println
+    MsgPackRpcClientSockPool.enqueue!(self.sock_pool, sock)
   end
   self
 end
 
+# TODO: Use pointer
 function rotate(self::Session)
   MsgPackRpcClientSockPool.enqueue!(self.sock_pool, self.sock)
   self.sock = MsgPackRpcClientSockPool.dequeue!(self.sock_pool)
