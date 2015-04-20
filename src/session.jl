@@ -1,27 +1,44 @@
 module MsgPackRpcClientSession
 
 include("sock_pool.jl")
+include("const.jl")
 
 type Session
   sock      :: Union(Base.TcpSocket, Base.UdpSocket, Nothing)
-  sock_pool :: Any #Union(MsgPackRpcClientSockPool.SockPool, Nothing)
+#  sock_pool :: Any #Union(MsgPackRpcClientSockPool.SockPool, Nothing)
+  sock_pool :: MsgPackRpcClientSockPool.SockPool
   next_id   :: Int
 
-  create    :: Function
-  destroy   :: Function
+  create        :: Function
+  destroy       :: Function
+  set_sock      :: Function
+  set_sock_pool :: Function
+  set_next_id   :: Function
+  get_sock      :: Function
+  get_sock_pool :: Function
+  get_next_id   :: Function
+  rotate        :: Function
 
-  function Session(sock = nothing, sock_pool = nothing, next_id = 1)
+  function Session(sock = nothing, sock_pool = {}, next_id = 1)
     this           = new()
     this.sock      = sock
     this.sock_pool = sock_pool
     this.next_id   = next_id
-    this.create    = function() create(sock, sock_pool, next_id) end
-    this.destroy   = function() destroy(this) end
+    this.create        = function() create(sock, sock_pool, next_id) end
+    this.destroy       = function() destroy(this) end
+    this.set_sock      = function() set_sock(this, sock) end
+    this.set_sock_pool = function() set_sock_pool(this, sock_pool) end
+    this.set_next_id   = function() set_next_id(this, next_id) end
+    this.get_sock      = function() get_sock(this) end
+    this.get_sock_pool = function() get_sock_pool(this) end
+    this.get_next_id   = function() get_next_id(this) end
+    this.rotate        = function() rotate(this) end
     this
   end
 end
 
-function create(sock = nothing, sock_pool = nothing, next_id = 1)
+#function create(sock = nothing, sock_pool::Union(MsgPackRpcClientSockPool.SockPool, Array) = {}, next_id = 1)
+function create(sock = nothing, sock_pool::MsgPackRpcClientSockPool.SockPool = MsgPackRpcClientSockPool.SockPool({}), next_id = 1)
   Session(sock, sock_pool, next_id)
 end
 
@@ -30,7 +47,7 @@ function destroy(self::Session)
     if self.sock != nothing
       close(self.sock)
     end
-    if self.sock_pool != nothing
+    if self.sock_pool != {}
       MsgPackRpcClientSockPool.destroy(self.sock_pool)
     end
     next_id = 1
@@ -38,6 +55,49 @@ function destroy(self::Session)
     return false
   end
   true
+end
+
+function set_sock(self::Session, sock::Union(Base.TcpSocket, Base.UdpSocket, Nothing))
+  self.sock = sock
+  self
+end
+
+function set_sock_pool(self::Session, sock_pool::Any)
+  self.sock_pool = sock_pool
+  self
+end
+
+function set_next_id(self::Session, next_id::Int)
+  self.next_id = next_id
+  self
+end
+
+function get_sock(self::Session)
+  self.sock
+end
+
+function get_sock_pool(self::Session)
+  self.sock_pool
+end
+
+function get_next_id(self::Session)
+  self.next_id
+end
+
+function create_sock(self::Session, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
+  sock = connect(host, port)
+  if self.sock == nothing
+    self.sock = sock #|> println
+  else
+    MsgPackRpcClientSockPool.enqueue!(self.sock_pool, sock) #|> println
+  end
+  self
+end
+
+function rotate(self::Session)
+  MsgPackRpcClientSockPool.enqueue!(self.sock_pool, self.sock)
+  self.sock = MsgPackRpcClientSockPool.dequeue!(self.sock_pool)
+  self
 end
 
 end # module MagPackRpcClientSession
