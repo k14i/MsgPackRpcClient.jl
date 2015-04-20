@@ -10,14 +10,14 @@ using MsgPack
 export MsgPackRpcClientSession, call, get #, MsgPackRpcClientSockPool
 
 function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = true)
-  if s.sock_pool == nothing
+  if s.sock_pool == {}
     s.sock_pool = MsgPackRpcClientSockPool.new()
   end
   if s.sock == nothing
     try
       s.sock = MsgPackRpcClientSockPool.pop!(s.sock_pool)
     catch
-      MsgPackRpcClientSockPool.connect_and_push!(sock_pool)
+      MsgPackRpcClientSockPool.connect_and_push!(s.sock_pool)
       s.sock = MsgPackRpcClientSockPool.pop!(s.sock_pool)
     end
   end

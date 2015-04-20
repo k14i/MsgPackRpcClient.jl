@@ -1,19 +1,23 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
+# NOTE: Do once -> gem install msgpack-rpc
 require 'msgpack/rpc'
+require 'socket'
 
 class HelloServer
-  attr_accessor :time
+  attr_accessor :time, :hostname, :port
 
-  def initialize
+  def initialize(port)
     @time = 0
+    @hostname = Socket.gethostname
+    @port = port
   end
 
   def hello
     @time = @time + 1
     puts @time
-    return "Hello, World!"
+    return "Hello, World! ##{@time} from #{@hostname}:#{@port}"
   end
 
   def hello0
@@ -47,7 +51,7 @@ else
 end
 
 svr = MessagePack::RPC::Server.new
-svr.listen("0.0.0.0", port, HelloServer.new)
+svr.listen("0.0.0.0", port, HelloServer.new(port))
 
 Signal.trap(:TERM) { svr.stop }
 Signal.trap(:INT) { svr.stop }

@@ -32,7 +32,7 @@ function push!(self::SockPool, sock::Union(Base.TcpSocket, Base.UdpSocket))
   enqueue!(self, sock)
 end
 
-function pop!(self::SockPool; or_create = true, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
+function pop!(self; or_create = true, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
   try
     sock = pop!(self.pool)
     return sock
@@ -70,8 +70,8 @@ function dequeue!(self::SockPool)
   end
 end
 
-function connect_and_push!(self::SockPool, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
-  push!(self.pool, connect(host, port))
+function connect_and_push!(self, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
+  Base.push!(self.pool, connect(host, port))
   self
 end
 

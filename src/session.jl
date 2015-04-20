@@ -19,7 +19,7 @@ type Session
   get_next_id   :: Function
   rotate        :: Function
 
-  function Session(sock = nothing, sock_pool = {}, next_id = 1)
+  function Session(sock = nothing, sock_pool = MsgPackRpcClientSockPool.SockPool({}), next_id = 1)
     this           = new()
     this.sock      = sock
     this.sock_pool = sock_pool
