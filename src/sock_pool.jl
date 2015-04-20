@@ -9,7 +9,7 @@ type SockPool
 end
 
 function new()
-  SockPool(Union(Base.TcpSocket, Base.UdpSocket, Nothing)[])
+  SockPool(Union(Base.TcpSocket, Base.UdpSocket)[])
 end
 
 function show(self::SockPool)
@@ -29,8 +29,7 @@ end
 #end
 
 function push!(self::SockPool, sock::Union(Base.TcpSocket, Base.UdpSocket))
-  push!(self.pool, sock)
-  self
+  enqueue!(self, sock)
 end
 
 function pop!(self::SockPool; or_create = true, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
@@ -50,6 +49,25 @@ function pop!(self::SockPool; or_create = true, host::String = "localhost", port
   end
 
   nothing
+end
+
+function enqueue!(self::SockPool, sock::Union(Base.TcpSocket, Base.UdpSocket))
+  try
+    Base.push!(self.pool, sock)
+  catch
+    self = SockPool({})
+  end
+  self
+end
+
+function dequeue!(self::SockPool)
+  try
+    sock = self.pool[1]
+    deleteat!(self.pool, 1)
+    return sock
+  catch
+    return nothing
+  end
 end
 
 function connect_and_push!(self::SockPool, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
@@ -75,7 +93,8 @@ function delete(self::SockPool, sock::Base.TcpSocket)
       if isopen(self.pool[i])
         close(self.pool[i])
       end
-      self.pool[i] = nothing
+      deleteat!(self.pool, i)
+      break
     end
     i += 1
   end
