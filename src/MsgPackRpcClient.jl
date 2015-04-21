@@ -1,25 +1,22 @@
 module MsgPackRpcClient
 
 include("const.jl")
-include("sock_pool.jl")
+include("socks.jl")
 include("session.jl")
 include("future.jl")
 
 using MsgPack
 
-export MsgPackRpcClientSession, call, get #, MsgPackRpcClientSockPool
+export MsgPackRpcClientSession, call, get #, MsgPackRpcClientSocks
 
-function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = true)
-  if s.sock_pool == {}
-    s.sock_pool = MsgPackRpcClientSockPool.new()
-  end
-  if s.sock == nothing
-#  if s.ptr == 0
+function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = true, sock = nothing)
+  if sock == nothing
     try
-      s.sock = MsgPackRpcClientSockPool.pop!(s.sock_pool)
+      sock = s.get_sock()
     catch
-      MsgPackRpcClientSockPool.connect_and_push!(s.sock_pool)
-      s.sock = MsgPackRpcClientSockPool.pop!(s.sock_pool)
+      MsgPackRpcClientSocks.connect_and_push!(s.socks)
+      s.ptr = 1
+      sock = s.get_sock()
     end
   end
 
@@ -31,13 +28,13 @@ function call(s::MsgPackRpcClientSession.Session, method::String, params...; syn
     s.next_id += 1
   end
 
-  future = send_request(s.sock, msg_id, method, params)
+  future = send_request(sock, msg_id, method, params)
 
   if sync == true
-    receive_response(s.sock, future)
+    receive_response(sock, future)
     return get(future)
   else
-    future.task = @async receive_response(s.sock, future)
+    future.task = @async receive_response(sock, future)
     return future
   end
 end

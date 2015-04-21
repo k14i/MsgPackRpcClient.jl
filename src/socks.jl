@@ -1,23 +1,21 @@
-module MsgPackRpcClientSockPool
-
-#export SockPool
+module MsgPackRpcClientSocks
 
 include("const.jl")
 
-type SockPool
+type Socks
   pool :: Array
 end
 
 function new()
-  SockPool(Union(Base.TcpSocket, Base.UdpSocket)[])
+  Socks(Union(Base.TcpSocket, Base.UdpSocket)[])
 end
 
-function show(self::SockPool)
+function show(self::Socks)
   println(self.pool)
   nothing
 end
 
-function is_empty(self::SockPool)
+function is_empty(self::Socks)
   if length(self.pool) != 0
     return false
   else
@@ -25,10 +23,14 @@ function is_empty(self::SockPool)
   end
 end
 
-#function reject!(self::SockPool)
+#function reject!(self::Socks)
 #end
 
-function push!(self::SockPool, sock::Union(Base.TcpSocket, Base.UdpSocket))
+function get_sock(self, ptr::Int)
+  self.pool[ptr]
+end
+
+function push!(self::Socks, sock::Union(Base.TcpSocket, Base.UdpSocket))
   enqueue!(self, sock)
 end
 
@@ -51,16 +53,16 @@ function pop!(self; or_create = true, host::String = "localhost", port::Int = DE
   nothing
 end
 
-function enqueue!(self::SockPool, sock::Union(Base.TcpSocket, Base.UdpSocket))
+function enqueue!(self::Socks, sock::Union(Base.TcpSocket, Base.UdpSocket))
   try
     Base.push!(self.pool, sock)
   catch
-    self = SockPool({})
+    self = Socks({})
   end
   self
 end
 
-function dequeue!(self::SockPool)
+function dequeue!(self::Socks)
   try
     sock = self.pool[1]
     deleteat!(self.pool, 1)
@@ -75,7 +77,7 @@ function connect_and_push!(self, host::String = "localhost", port::Int = DEFAULT
   self
 end
 
-function connect_in_port_range_and_push!(self::SockPool,
+function connect_in_port_range_and_push!(self::Socks,
                                          host::String = "localhost",
                                          range::UnitRange = DEFAULT_PORT_NUMBER:DEFAULT_PORT_NUMBER)
   @sync begin
@@ -86,7 +88,7 @@ function connect_in_port_range_and_push!(self::SockPool,
   self
 end
 
-function delete(self::SockPool, sock::Base.TcpSocket)
+function delete(self::Socks, sock::Base.TcpSocket)
   i = 1
   for x in self.pool
     if x == sock
@@ -101,7 +103,7 @@ function delete(self::SockPool, sock::Base.TcpSocket)
   self
 end
 
-function destroy(self::SockPool)
+function destroy(self::Socks)
   try
     if is_empty(self)
       return true
@@ -120,4 +122,4 @@ function destroy(self::SockPool)
   true
 end
 
-end # module MsgPackRpcClientSockPool
+end # module MsgPackRpcClientSocks

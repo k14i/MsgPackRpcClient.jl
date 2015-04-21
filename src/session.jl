@@ -1,73 +1,69 @@
 module MsgPackRpcClientSession
 
-include("sock_pool.jl")
+include("socks.jl")
 include("const.jl")
 
-# TODO: Unite sock and sock_pool
 type Session
-  sock      :: Union(Base.TcpSocket, Base.UdpSocket, Nothing)
-  sock_pool :: MsgPackRpcClientSockPool.SockPool
+  socks     :: MsgPackRpcClientSocks.Socks
   ptr       :: Int
   next_id   :: Int
 
   create        :: Function
   destroy       :: Function
-  set_sock      :: Function
-  set_sock_pool :: Function
+  set_socks     :: Function
+  set_ptr       :: Function
   set_next_id   :: Function
   get_sock      :: Function
-  get_sock_pool :: Function
+  get_socks     :: Function
+  get_ptr       :: Function
   get_next_id   :: Function
   rotate        :: Function
 
-  function Session(sock = nothing, sock_pool = MsgPackRpcClientSockPool.SockPool({}), ptr = 0, next_id = 1)
+  function Session(socks = MsgPackRpcClientSocks.Socks({}), ptr = 0, next_id = 1)
     this           = new()
-    this.sock      = sock
-    this.sock_pool = sock_pool
+    this.socks     = socks
     this.ptr       = ptr
     this.next_id   = next_id
-    this.create        = function() create(sock, sock_pool, next_id) end
+    this.create        = function() create(socks, next_id) end
     this.destroy       = function() destroy(this) end
-    this.set_sock      = function() set_sock(this, sock) end
-    this.set_sock_pool = function() set_sock_pool(this, sock_pool) end
+    this.set_socks     = function() set_socks(this, socks) end
+    this.set_ptr       = function() set_ptr(this, ptr) end
     this.set_next_id   = function() set_next_id(this, next_id) end
     this.get_sock      = function() get_sock(this) end
-    this.get_sock_pool = function() get_sock_pool(this) end
+    this.get_socks     = function() get_socks(this) end
+    this.get_ptr       = function() get_ptr(this) end
     this.get_next_id   = function() get_next_id(this) end
     this.rotate        = function() rotate(this) end
     this
   end
 end
 
-function create(sock = nothing,
-                sock_pool::MsgPackRpcClientSockPool.SockPool = MsgPackRpcClientSockPool.SockPool({}),
+function create(socks::MsgPackRpcClientSocks.Socks = MsgPackRpcClientSocks.Socks({}),
                 ptr = 0,
                 next_id = 1)
-  Session(sock, sock_pool, ptr, next_id)
+  Session(socks, ptr, next_id)
 end
 
 function destroy(self::Session)
   try
-    if self.sock != nothing
-      close(self.sock)
+    if self.socks != {}
+      MsgPackRpcClientSocks.destroy(self.socks)
     end
-    if self.sock_pool != {}
-      MsgPackRpcClientSockPool.destroy(self.sock_pool)
-    end
-    next_id = 1
+    self.ptr = 1
+    self.next_id = 1
   catch
     return false
   end
   true
 end
 
-function set_sock(self::Session, sock::Union(Base.TcpSocket, Base.UdpSocket, Nothing))
-  self.sock = sock
+function set_socks(self::Session, socks::Any)
+  self.socks = socks
   self
 end
 
-function set_sock_pool(self::Session, sock_pool::Any)
-  self.sock_pool = sock_pool
+function set_ptr(self::Session, ptr::Int)
+  self.ptr = ptr
   self
 end
 
@@ -77,11 +73,15 @@ function set_next_id(self::Session, next_id::Int)
 end
 
 function get_sock(self::Session)
-  self.sock
+  self.socks.pool[self.ptr]
 end
 
-function get_sock_pool(self::Session)
-  self.sock_pool
+function get_socks(self::Session)
+  self.socks
+end
+
+function get_ptr(self::Session)
+  self.ptr
 end
 
 function get_next_id(self::Session)
@@ -90,19 +90,20 @@ end
 
 function create_sock(self::Session, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
   sock = connect(host, port)
-  if self.sock == nothing
-    self.sock = sock
-  else
-    MsgPackRpcClientSockPool.enqueue!(self.sock_pool, sock)
+  MsgPackRpcClientSocks.enqueue!(self.socks, sock)
+  if self.ptr == 0
+    self.ptr = 1
   end
   self
 end
 
-# TODO: Use pointer
 function rotate(self::Session)
-  MsgPackRpcClientSockPool.enqueue!(self.sock_pool, self.sock)
-  self.sock = MsgPackRpcClientSockPool.dequeue!(self.sock_pool)
-  self
+  if self.ptr + 1 > length(self.socks.pool)
+    self.ptr = 1
+  else
+    self.ptr += 1
+  end
+  self.socks.pool[self.ptr]
 end
 
 end # module MagPackRpcClientSession

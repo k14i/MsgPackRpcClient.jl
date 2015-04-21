@@ -11,7 +11,7 @@ futures = {}
 
 @sync begin
 @async for i in 1:10000
-  future  = call(session, "hello"; sync = false)
+  future  = call(session, "hello"; sync = false, sock = session.socks.pool[session.ptr])
   push!(futures, get(future))
   MsgPackRpcClientSession.rotate(session)
 end
