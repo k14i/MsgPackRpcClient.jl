@@ -108,7 +108,7 @@ function receive_response(sock, future::Future; interval = 1)
     return nothing
   end
 
-  if unpacked_data[3] != nothing  # error
+  if unpacked_data[3] != nothing # error
     future.error = unpacked_data[3]
   end
 

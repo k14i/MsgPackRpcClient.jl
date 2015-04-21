@@ -4,36 +4,36 @@ include("socks.jl")
 include("const.jl")
 
 type Session
-  socks     :: MsgPackRpcClientSocks.Socks
-  ptr       :: Int
-  next_id   :: Int
+  socks   :: MsgPackRpcClientSocks.Socks
+  ptr     :: Int
+  next_id :: Int
 
-  create        :: Function
-  destroy       :: Function
-  set_socks     :: Function
-  set_ptr       :: Function
-  set_next_id   :: Function
-  get_sock      :: Function
-  get_socks     :: Function
-  get_ptr       :: Function
-  get_next_id   :: Function
-  rotate        :: Function
+  create      :: Function
+  destroy     :: Function
+  set_socks   :: Function
+  set_ptr     :: Function
+  set_next_id :: Function
+  get_sock    :: Function
+  get_socks   :: Function
+  get_ptr     :: Function
+  get_next_id :: Function
+  rotate      :: Function
 
   function Session(socks = MsgPackRpcClientSocks.Socks({}), ptr = 0, next_id = 1)
-    this           = new()
-    this.socks     = socks
-    this.ptr       = ptr
-    this.next_id   = next_id
-    this.create        = function() create(socks, next_id) end
-    this.destroy       = function() destroy(this) end
-    this.set_socks     = function() set_socks(this, socks) end
-    this.set_ptr       = function() set_ptr(this, ptr) end
-    this.set_next_id   = function() set_next_id(this, next_id) end
-    this.get_sock      = function() get_sock(this) end
-    this.get_socks     = function() get_socks(this) end
-    this.get_ptr       = function() get_ptr(this) end
-    this.get_next_id   = function() get_next_id(this) end
-    this.rotate        = function() rotate(this) end
+    this         = new()
+    this.socks   = socks
+    this.ptr     = ptr
+    this.next_id = next_id
+    this.create      = function() create(socks, next_id) end
+    this.destroy     = function() destroy(this) end
+    this.set_socks   = function() set_socks(this, socks) end
+    this.set_ptr     = function() set_ptr(this, ptr) end
+    this.set_next_id = function() set_next_id(this, next_id) end
+    this.get_sock    = function() get_sock(this) end
+    this.get_socks   = function() get_socks(this) end
+    this.get_ptr     = function() get_ptr(this) end
+    this.get_next_id = function() get_next_id(this) end
+    this.rotate      = function() rotate(this) end
     this
   end
 end
@@ -46,7 +46,7 @@ end
 
 function destroy(self::Session)
   try
-    if self.socks != {}
+    if length(self.socks.pool) > 0
       MsgPackRpcClientSocks.destroy(self.socks)
     end
     self.ptr = 1
@@ -98,6 +98,9 @@ function create_sock(self::Session, host::String = "localhost", port::Int = DEFA
 end
 
 function rotate(self::Session)
+  if self.ptr == 0
+    # TODO: raise
+  end
   if self.ptr + 1 > length(self.socks.pool)
     self.ptr = 1
   else
