@@ -7,6 +7,7 @@ include("const.jl")
 type Session
   sock      :: Union(Base.TcpSocket, Base.UdpSocket, Nothing)
   sock_pool :: MsgPackRpcClientSockPool.SockPool
+  ptr       :: Int
   next_id   :: Int
 
   create        :: Function
@@ -19,10 +20,11 @@ type Session
   get_next_id   :: Function
   rotate        :: Function
 
-  function Session(sock = nothing, sock_pool = MsgPackRpcClientSockPool.SockPool({}), next_id = 1)
+  function Session(sock = nothing, sock_pool = MsgPackRpcClientSockPool.SockPool({}), ptr = 0, next_id = 1)
     this           = new()
     this.sock      = sock
     this.sock_pool = sock_pool
+    this.ptr       = ptr
     this.next_id   = next_id
     this.create        = function() create(sock, sock_pool, next_id) end
     this.destroy       = function() destroy(this) end
@@ -39,8 +41,9 @@ end
 
 function create(sock = nothing,
                 sock_pool::MsgPackRpcClientSockPool.SockPool = MsgPackRpcClientSockPool.SockPool({}),
+                ptr = 0,
                 next_id = 1)
-  Session(sock, sock_pool, next_id)
+  Session(sock, sock_pool, ptr, next_id)
 end
 
 function destroy(self::Session)

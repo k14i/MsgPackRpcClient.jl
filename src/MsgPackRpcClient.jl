@@ -14,6 +14,7 @@ function call(s::MsgPackRpcClientSession.Session, method::String, params...; syn
     s.sock_pool = MsgPackRpcClientSockPool.new()
   end
   if s.sock == nothing
+#  if s.ptr == 0
     try
       s.sock = MsgPackRpcClientSockPool.pop!(s.sock_pool)
     catch
