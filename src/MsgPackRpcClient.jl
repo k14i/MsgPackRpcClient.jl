@@ -52,7 +52,7 @@ function send_request(sock, msg_id::Int, method::String, args)
   #else
   #  # error
   end
-  Future(TIMEOUT_IN_SEC, nothing, nothing, nothing, false, nothing, nothing, nothing, msg_id, nothing)
+  MsgPackRpcClientFuture.Future(TIMEOUT_IN_SEC, nothing, nothing, nothing, false, nothing, nothing, nothing, msg_id, nothing)
 end
 
 function send_data_in_tcp(sock::Base.TcpSocket, data)
@@ -65,7 +65,7 @@ function send_data_in_udp(sock::Base.UdpSocket, data, host::String, port::Int)
   nothing
 end
 
-function get(future::Future)
+function get(future::MsgPackRpcClientFuture.Future)
   if future.task != nothing
     wait(future.task)
   end
@@ -86,7 +86,7 @@ function get(future::Future)
   nothing
 end
 
-function receive_response(sock, future::Future; interval = 1)
+function receive_response(sock, future::MsgPackRpcClientFuture.Future; interval = 1)
   unpacked_data = {}
   timeout = future.timeout
 
@@ -119,12 +119,12 @@ function receive_response(sock, future::Future; interval = 1)
   future
 end
 
-function receive_data(sock, future::Future)
+function receive_data(sock, future::MsgPackRpcClientFuture.Future)
   join(sock, future)
   nothing
 end
 
-function join(sock, future::Future; interval = 1)
+function join(sock, future::MsgPackRpcClientFuture.Future; interval = 1)
   timeout = future.timeout
   while future.is_set == false && timeout > 0
     future.raw = readavailable(sock)

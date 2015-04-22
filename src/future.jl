@@ -1,3 +1,5 @@
+module MsgPackRpcClientFuture
+
 type Future
   timeout          :: Int
   callback_handler :: Any
@@ -10,6 +12,8 @@ type Future
   msg_id           :: Int
   task             :: Union(Task, Nothing)
 end
+
+end # module MsgPackRpcClientFuture
 
 
 # module future
