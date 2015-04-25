@@ -1,20 +1,20 @@
 #!/usr/bin/env julia
 
-include("../src/MsgPackRpcClient.jl")
-using MsgPackRpcClient
+#include("../src/MsgPackRpcClient.jl")
+#using MsgPackRpcClient
 
-#tests = ["sync_call", "async_call"]
-tests = ["sync_call"]
+tests = ["sync_call", "async_call"]
 
 println("Running tests:")
 
-#task = @async `ruby test_server.rb`
-#`ruby test_server.rb`
+@sync begin
+addprocs(1)
+@spawn remotecall(2, run(`ruby test_server.rb`))
 
 for t in tests
   test_fn = "$t.jl"
   println(" * $test_fn")
-  include(test_fn)
+  run(`julia $test_fn`)
 end
 
-#wait(task)
+end

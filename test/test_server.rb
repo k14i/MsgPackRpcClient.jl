@@ -15,7 +15,7 @@ class TestServer
   end
 
   def echo(*msg)
-    p msg
+    #p msg
     return msg
   rescue e
     p "Error: "
