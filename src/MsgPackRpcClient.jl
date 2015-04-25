@@ -1,6 +1,7 @@
 module MsgPackRpcClient
 
 include("const.jl")
+include("base.jl")
 include("socks.jl")
 include("session.jl")
 include("future.jl")
@@ -40,11 +41,8 @@ function call(s::MsgPackRpcClientSession.Session, method::String, params...; syn
 end
 
 function send_request(sock, msg_id::Int, method::String, args)
-  params = {}  # NOTE: Equal to ```params = Any[]```, which can grow.
-  for x in args
-    push!(params, x)
-  end
-  packed_data = MsgPack.pack([REQUEST, msg_id, method, params])
+  params = MsgPackRpcClientBase.to_a(args)
+  packed_data = MsgPack.pack({REQUEST, msg_id, method, params})
   if typeof(sock) == Base.TcpSocket
     send_data_in_tcp(sock, packed_data)
   #else if typeof(sock) == Base.UdpSocket
@@ -92,11 +90,11 @@ function receive_response(sock, future::MsgPackRpcClientFuture.Future; interval 
 
   while 0 <= timeout
     receive_data(sock, future)
-    if future.is_set == false
-      # println("continue")
-      # sleep(1)
-      # continue
-    end
+    # if future.is_set == false
+    #  println("continue")
+    #  sleep(1)
+    #  continue
+    # end
     unpacked_data = MsgPack.unpack(future.raw)
     if unpacked_data[1] != RESPONSE || unpacked_data[2] != future.msg_id # type, msgid
       timeout -= interval

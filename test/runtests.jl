@@ -1,3 +1,5 @@
+#!/usr/bin/env julia
+
 include("../src/MsgPackRpcClient.jl")
 using MsgPackRpcClient
 

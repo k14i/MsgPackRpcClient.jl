@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 require 'msgpack/rpc'
+#require 'msgpack'
 require 'socket'
 
 class TestServer
@@ -11,6 +12,14 @@ class TestServer
     @time = 0
     @hostname = Socket.gethostname
     @port = port
+  end
+
+  def echo(*msg)
+    p msg
+    return msg
+  rescue e
+    p "Error: "
+    p e
   end
 
   def test
