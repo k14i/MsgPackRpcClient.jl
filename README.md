@@ -14,6 +14,59 @@ use MsgPackRpcClient
 * MsgPack.jl
 
 
+## Usage
+
+At first, you should create a session.
+
+```julia
+  session = MsgPackRpcClientSession.create()
+```
+
+The session can hold multiple sockets.
+
+```julia
+  MsgPackRpcClientSession.create_sock(session, "localhost", 5000)
+  MsgPackRpcClientSession.create_sock(session, "localhost", 5001)
+  MsgPackRpcClientSession.create_sock(session, "localhost", 5002)
+```
+
+Or if you use an empty session, a socket may be created automatically when "call" is executed.
+
+Then, you can call a server.
+
+```julia
+  call(session, "SOME_PRE-DEFINED_METHOD")
+```
+
+You can specify additional arguments; sync and sock.
+
+You can call the server in async instead of default sync way.
+
+```julia
+  call(session, "SOME_PRE-DEFINED_METHOD"; sync = false)
+```
+
+When you use async call, the call function returns a future.
+If you want to get the result, use get() function.
+
+```julia
+  future = call(session, "SOME_PRE-DEFINED_METHOD"; sync = false)
+  get(future)
+```
+
+And you can specify a socket in the pool of the session.
+
+```julia
+  call(session, "SOME_PRE-DEFINED_METHOD"; sock = last(session.socks.pool))
+```
+
+After all, you must disconnect from all the servers.
+
+```julia
+  session.destroy()
+```
+
+
 ## Example
 
 See examples.

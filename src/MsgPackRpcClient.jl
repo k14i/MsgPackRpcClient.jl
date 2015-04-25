@@ -8,7 +8,7 @@ include("future.jl")
 
 using MsgPack
 
-export MsgPackRpcClientSession, call, get #, MsgPackRpcClientSocks
+export MsgPackRpcClientSession, call, get
 
 function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = true, sock = nothing)
   if sock == nothing
