@@ -7,7 +7,8 @@ tests = ["sync_call", "async_call"]
 
 println("Running tests:")
 
-@sync begin
+#@sync begin
+
 addprocs(1)
 @spawn remotecall(2, run(`ruby test_server.rb`))
 
@@ -17,4 +18,9 @@ for t in tests
   run(`julia $test_fn`)
 end
 
+try
+  run(`pkill ruby`)
+catch
 end
+
+#end

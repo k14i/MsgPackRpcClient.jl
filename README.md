@@ -6,7 +6,7 @@ A Julia implementation of MessagePack-RPC Client Library.
 ## Installation
 
 ```julia
-use MsgPackRpcClient
+import MsgPackRpcClient
 ```
 
 ### Dependency
