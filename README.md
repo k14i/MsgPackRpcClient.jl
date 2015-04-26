@@ -89,7 +89,7 @@ See examples.
 
 ## Specification
 
-### Data Types
+### Data Types (Abstruct)
 
 * Session
   * socks::MsgPackRpcClientSocks
@@ -113,7 +113,7 @@ See examples.
     * Asynchronous task to join.
 
 
-### MsgPackRpcClient.jl APIs
+### MsgPackRpcClient.jl APIs (Abstruct)
 
 * MsgPackRpcClient module
   * `call(session::MsgPackRpcClientSession.Session, method::String, params...; sync = true, sock = nothing)`
