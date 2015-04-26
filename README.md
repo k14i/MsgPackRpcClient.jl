@@ -140,24 +140,24 @@ See examples.
 
 Folloing table explains type mapping between Julia and MessagePack-RPC.
 
-| Julia Built-in Types  | Example       | MsgPack Types | Derived from        |
-| --------------------- | ------------- | ------------- | ------------------- |
-| Nothing               | nothing       | Nil           | MsgPack.jl          |
-| Bool                  | true          | Boolean       | MsgPack.jl          |
-| Int (8,16,32,64)      | 1<<63 - 1     | Integer       | MsgPack.jl          |
-| Int128                |               | --            | MsgPack, MsgPack.jl |
-| Uint (8,16,32,64)     | 1<<63         | Integer       | MsgPack.jl          |
-| Uint128               |               | --            | MsgPack, MsgPack.jl |
-| Float16               |               | --            | MsgPack, MsgPack.jl |
-| Float (32,64)         | 1.0           | Float         | MsgPack.jl          |
-| String                | "foo"         | String        | MsgPack.jl          |
-| Vector{Uint8}         |               | Binary        | MsgPack.jl          |
-| Vector                |               | Array         | MsgPack.jl          |
-| Array{Any,1}          | {1.0, 2, "3"} | Array         | MsgPack.jl          |
-| Array{None,1}         | []            | Array         | MsgPack.jl          |
-| Tuple                 | ((1,2,)3,)    | Array         | MsgPackRpcClient.jl |
-| Dict                  | {"k" => "v"}  | Map           | MsgPack.jl          |
-| (MsgPack.jl) Ext      |               | Extended      | MsgPack.jl          |
+| Julia Built-in Types  | Examples                                   | MsgPack Types | Derived from        |
+| --------------------- | ------------------------------------------ | ------------- | ------------------- |
+| Nothing               | nothing                                    | Nil           | MsgPack.jl          |
+| Bool                  | true, false                                | Boolean       | MsgPack.jl          |
+| Int (8,16,32,64)      | 9223372036854775807 (1<<63 -1)             | Integer       | MsgPack.jl          |
+| Int128                |                                            | --            | MsgPack, MsgPack.jl |
+| Uint (8,16,32,64)     | -9223372036854775808 (1<<63)               | Integer       | MsgPack.jl          |
+| Uint128               |                                            | --            | MsgPack, MsgPack.jl |
+| Float16               |                                            | --            | MsgPack, MsgPack.jl |
+| Float (32,64)         | 1.0, 3.1415926535897                       | Float         | MsgPack.jl          |
+| String                | "foo"                                      | String        | MsgPack.jl          |
+| Vector{Uint8}         |                                            | Binary        | MsgPack.jl          |
+| Vector                |                                            | Array         | MsgPack.jl          |
+| Array{Any,1}          | {}, {1,2,3}, {{1.0, 2}, "3"}               | Array         | MsgPack.jl          |
+| Array{None,1}         | []                                         | Array         | MsgPack.jl          |
+| Tuple                 | (), (1,2,3,), ((1,2,)3,)                   | Array         | MsgPackRpcClient.jl |
+| Dict                  | {"k1" => {"k1.1" => "v1.1"}, "k2" => "v2"} | Map           | MsgPack.jl          |
+| (MsgPack.jl) Ext      |                                            | Extended      | MsgPack.jl          |
 
 
 ---
