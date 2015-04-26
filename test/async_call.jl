@@ -13,12 +13,12 @@ function test_data(data, number = 1)
   results = {}
   expects = {}
   for d in data
-    future = MsgPackRpcClient.call(session, d["method"], d["message"]; sync = false)
+    future = MsgPackRpcClient.call(session, d["method"], d["arg"]; sync = false)
     push!(results, get(future) )
     if haskey(d, "expect")
       push!(expects, d["expect"])
     else
-      push!(expects, d["message"])
+      push!(expects, d["arg"])
     end
   end
 
@@ -28,7 +28,7 @@ function test_data(data, number = 1)
       @test first(results[number]) == expects[number]
       println("  => OK")
     catch
-      println("Error on d[\"message\"] = ", d["message"])
+      println("Error on d[\"arg\"] = ", d["arg"])
     end
     number += 1
   end
