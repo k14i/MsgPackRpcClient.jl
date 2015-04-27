@@ -21,3 +21,8 @@ function get_dataset()
   ]
 end
 
+function get_dataset_for_arguments()
+  [
+    {"method" => "echo", "arg1" => 1, "arg2" => 2, "arg3" => 3, "arg4" => 4, "expect" => {1,2,3,4}}
+  ]
+end
