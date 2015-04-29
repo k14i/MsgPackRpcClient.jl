@@ -9,10 +9,24 @@ i = 1
 hostname = "localhost"
 port = 5000
 
+function get_max_arg(data; prefix = "arg")
+  i = 1
+  while i < 65536
+    if haskey(data, "$(prefix)$(i)")
+      i += 1
+    else
+      break
+    end
+  end
+  i - 1
+end
+
 function test_data(data, number = 1)
   for d in data
     println("$(number): $d ")
     #try
+      max_arg = get_max_arg(d)
+
       if haskey(d, "arg4")
         result = MsgPackRpcClient.call(session, d["method"], d["arg1"], d["arg2"], d["arg3"], d["arg4"]; sync = true)
       elseif haskey(d, "arg3")
@@ -24,23 +38,13 @@ function test_data(data, number = 1)
       else
         error
       end
+
       #println("result = ", result)
       #println("first(result) = ", first(result))
       if haskey(d, "expect")
-        if haskey(d, "arg4")
-          @test result[4] == d["expect"][4]
+        for i = 1:max_arg
+          @test result[i] == d["expect"][i]
         end
-        if haskey(d, "arg3")
-          @test result[3] == d["expect"][3]
-        end
-        if haskey(d, "arg2")
-          @test result[2] == d["expect"][2]
-        end
-        if haskey(d, "arg1")
-          @test result[1] == d["expect"][1]
-        end
-      else
-        #@test first(result) == d["arg"]
       end
       println("  => OK")
     #catch
