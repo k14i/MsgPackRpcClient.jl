@@ -24,10 +24,21 @@ function test_data(data, number = 1)
       else
         error
       end
-      println("result = ", result)
-      println("first(result) = ", first(result))
+      #println("result = ", result)
+      #println("first(result) = ", first(result))
       if haskey(d, "expect")
-        @test first(result) == d["expect"]
+        if haskey(d, "arg4")
+          @test result[4] == d["expect"][4]
+        end
+        if haskey(d, "arg3")
+          @test result[3] == d["expect"][3]
+        end
+        if haskey(d, "arg2")
+          @test result[2] == d["expect"][2]
+        end
+        if haskey(d, "arg1")
+          @test result[1] == d["expect"][1]
+        end
       else
         #@test first(result) == d["arg"]
       end

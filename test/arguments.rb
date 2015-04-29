@@ -41,12 +41,33 @@ class SyncCall < Test::Unit::TestCase
     ]
   end
 
+  def dataset_for_arguments
+    nothing = nil
+    [
+      {"method" => "echo", "arg1" => 1, "arg2" => 2, "arg3" => 3, "arg4" => 4, "expect" => [1,2,3,4]}
+    ]
+  end
+
   def test_sync_call
     session = get_session
     dataset.each do |d|
       result = session.call(d["method"], d["arg"])
       p result
       assert_equal(d["arg"], result.first)
+    end
+    session.close()
+  end
+
+  def test_arguments
+    session = get_session
+    dataset_for_arguments.each do |d|
+      p d
+      result = session.call(d["method"], d["arg1"], d["arg2"], d["arg3"], d["arg4"])
+      p result
+      assert_equal(d["arg1"], result[0])
+      assert_equal(d["arg2"], result[1])
+      assert_equal(d["arg3"], result[2])
+      assert_equal(d["arg4"], result[3])
     end
     session.close()
   end

@@ -3,7 +3,7 @@
 #include("../src/MsgPackRpcClient.jl")
 #using MsgPackRpcClient
 
-tests = ["sync_call", "async_call"]
+tests = ["sync_call", "async_call", "arguments"]
 
 println("Running tests:")
 
