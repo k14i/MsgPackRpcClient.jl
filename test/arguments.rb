@@ -3,11 +3,8 @@
 
 require 'msgpack/rpc'
 require 'test/unit'
-
-$i = 1
-HOSTNAME = "localhost"
-PORT = 5000
-TIMEOUT = 5
+require './dataset'
+require './const'
 
 class SyncCall < Test::Unit::TestCase
 
@@ -17,14 +14,8 @@ class SyncCall < Test::Unit::TestCase
     session
   end
 
-  def dataset
-    nothing = nil
-    [
-      {"method" => "echo", "arg1" => 1, "arg2" => 2, "arg3" => 3, "arg4" => 4, "expect" => [1,2,3,4]}
-    ]
-  end
-
   def test_arguments
+    dataset = DataSet.new.dataset_for_arguments
     session = get_session
     dataset.each do |d|
       p d

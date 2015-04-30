@@ -2,12 +2,9 @@
 
 include("../src/MsgPackRpcClient.jl")
 include("dataset.jl")
+include("const.jl")
 using MsgPackRpcClient
 using Base.Test
-
-i = 1
-hostname = "localhost"
-port = 5000
 
 function test_data(data, number = 1)
   for d in data

@@ -1,13 +1,10 @@
 #!/usr/bin/env julia
 
 include("../src/MsgPackRpcClient.jl")
+include("const.jl")
 include("dataset.jl")
 using MsgPackRpcClient
 using Base.Test
-
-i = 1
-hostname = "localhost"
-port = 5000
 
 function get_max_arg(data; prefix = "arg")
   i = 1
