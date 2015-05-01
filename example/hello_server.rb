@@ -6,17 +6,18 @@ require 'msgpack/rpc'
 require 'socket'
 
 class HelloServer
-  attr_accessor :time, :hostname, :port
+  attr_accessor :time, :hostname, :port, :denominator
 
   def initialize(port)
     @time = 0
     @hostname = Socket.gethostname
     @port = port
+    @denominator = 100
   end
 
   def hello
     @time = @time + 1
-    puts @time
+    puts @time if @time % @denominator == 0
     return "Hello, World! ##{@time} from #{@hostname}:#{@port}"
   end
 

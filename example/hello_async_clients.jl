@@ -7,19 +7,20 @@ MsgPackRpcClientSession.create_sock(session, "localhost", 5000)
 MsgPackRpcClientSession.create_sock(session, "localhost", 5001)
 MsgPackRpcClientSession.create_sock(session, "localhost", 5002)
 
-futures = {}
+the_number_of_call = 10000
+results = {}
 
 @sync begin
-@async for i in 1:10000
+@async for i in 1:the_number_of_call
   future  = call(session, "hello"; sync = false, sock = session.socks.pool[session.ptr])
-  push!(futures, get(future))
+  push!(results, get(future))
   MsgPackRpcClientSession.rotate(session)
 end
 end
 
 @sync begin
-@async for f in futures
-  println(f)
+@async for r in results
+  println(r)
 end
 end
 

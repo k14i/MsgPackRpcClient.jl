@@ -10,7 +10,7 @@ using MsgPack
 
 export MsgPackRpcClientSession, call, get
 
-function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = true, sock = nothing)
+function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = DEFAULT_SYNC_POLICY, sock = nothing)
   if sock == nothing
     try
       sock = s.get_sock()
@@ -23,11 +23,7 @@ function call(s::MsgPackRpcClientSession.Session, method::String, params...; syn
 
   msg_id = s.next_id
   # NOTE: For compatibility, msgid must be Int32
-  if s.next_id == 1<<31
-    s.next_id = 0
-  else
-    s.next_id += 1
-  end
+  s.next_id >= 1<<(BIT_OF_MSGID - 1) ? s.next_id = 0 : s.next_id += 1
 
   future = send_request(sock, msg_id, method, params)
 
@@ -84,7 +80,7 @@ function get(future::MsgPackRpcClientFuture.Future)
   nothing
 end
 
-function receive_response(sock, future::MsgPackRpcClientFuture.Future; interval = 1)
+function receive_response(sock, future::MsgPackRpcClientFuture.Future; interval = DEFAULT_INTERVAL)
   unpacked_data = {}
   timeout = future.timeout
 
@@ -122,7 +118,7 @@ function receive_data(sock, future::MsgPackRpcClientFuture.Future)
   nothing
 end
 
-function join(sock, future::MsgPackRpcClientFuture.Future; interval = 1)
+function join(sock, future::MsgPackRpcClientFuture.Future; interval = DEFAULT_INTERVAL)
   timeout = future.timeout
   while future.is_set == false && timeout > 0
     future.raw = readavailable(sock)
