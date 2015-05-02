@@ -10,7 +10,7 @@ using MsgPack
 
 export MsgPackRpcClientSession, call, get
 
-function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync = DEFAULT_SYNC_POLICY, sock = nothing)
+function call(s::MsgPackRpcClientSession.Session, method::String, params...; sync::Bool = DEFAULT_SYNC_POLICY, sock = nothing)
   if sock == nothing
     try
       sock = s.get_sock()
@@ -23,7 +23,7 @@ function call(s::MsgPackRpcClientSession.Session, method::String, params...; syn
 
   msg_id = s.next_id
   # NOTE: For compatibility, msgid must be Int32
-  s.next_id >= 1<<(BIT_OF_MSGID - 1) ? s.next_id = 0 : s.next_id += 1
+  s.next_id = s.next_id >= 1<<(BIT_OF_MSGID - 1) ? 0 : s.next_id + 1
 
   future = send_request(sock, msg_id, method, params)
 
