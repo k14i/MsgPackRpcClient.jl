@@ -88,7 +88,7 @@ function get_next_id(self::Session)
   self.next_id
 end
 
-function create_sock(self::Session, host::String = "localhost", port::Int = DEFAULT_PORT_NUMBER)
+function create_sock(self::Session, host::String = DEFAULT_HOST, port::Int = DEFAULT_PORT_NUMBER)
   sock = connect(host, port)
   MsgPackRpcClientSocks.enqueue!(self.socks, sock)
   if self.ptr == 0
@@ -101,11 +101,7 @@ function rotate(self::Session)
   if self.ptr == 0
     # TODO: raise
   end
-  if self.ptr + 1 > length(self.socks.pool)
-    self.ptr = 1
-  else
-    self.ptr += 1
-  end
+  self.ptr = self.ptr + 1 > length(self.socks.pool) ? 1 : self.ptr + 1
   self.socks.pool[self.ptr]
 end
 

@@ -5,7 +5,7 @@ A Julia implementation of MessagePack-RPC Client Library.
 
 ## Installation
 
-In the Julia CLI:
+In the Julia CLI (REPL):
 
 ```julia
 Pkg.add("MsgPackRpcClient")
