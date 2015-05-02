@@ -21,6 +21,7 @@ function call(s::MsgPackRpcClientSession.Session, method::String, params...; syn
     end
   end
 
+  # NOTE: Get msg_id and calculate next_id never to use the same msg_id even if a request fails.
   msg_id = s.next_id
   # NOTE: For compatibility, msgid must be Int32
   s.next_id = s.next_id >= 1<<(BIT_OF_MSGID - 1) ? 0 : s.next_id + 1
